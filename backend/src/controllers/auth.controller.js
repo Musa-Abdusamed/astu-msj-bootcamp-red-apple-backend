@@ -1,0 +1,74 @@
+const User = require('../models/User');
+const AppError = require('../utils/AppError');
+const asyncHandler = require('../utils/asyncHandler');
+const { createSendToken } = require('../services/auth.service');
+
+const register = asyncHandler(async (req, res, next) => {
+  const { fullName, email, password } = req.body;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(new AppError('An account with that email already exists.', 400));
+  }
+
+  const newUser = await User.create({
+    fullName,
+    email,
+    password,
+    role: 'student',
+  });
+
+  createSendToken(newUser, 201, res);
+});
+
+const login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password.', 400));
+  }
+
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user || !(await user.comparePassword(password))) {
+    return next(new AppError('Incorrect email or password.', 401));
+  }
+
+  if (!user.isActive) {
+    return next(new AppError('This account has been deactivated. Contact an admin.', 403));
+  }
+
+  createSendToken(user, 200, res);
+});
+
+const logout = asyncHandler(async (req, res) => {
+  res.cookie('token', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success', message: 'Logged out successfully.' });
+});
+
+const getMe = asyncHandler(async (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    data: { user: req.user },
+  });
+});
+
+const changePassword = asyncHandler(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user.id).select('+password');
+
+  if (!(await user.comparePassword(currentPassword))) {
+    return next(new AppError('Your current password is incorrect.', 401));
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  createSendToken(user, 200, res);
+});
+
+module.exports = { register, login, logout, getMe, changePassword };
