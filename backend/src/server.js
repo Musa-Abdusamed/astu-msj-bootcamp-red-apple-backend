@@ -6,6 +6,8 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/userRoutes");
 const batchRoutes = require("./routes/batchRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
+// const progressRoutes = require("./routes/progressRoutes");
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);       
 app.use("/api/users", userRoutes);      
 app.use("/api/batches", batchRoutes); 
+app.use("/api/attendance", attendanceRoutes);
+// app.use("/api/progress", progressRoutes);
 
 app.get("/", (req, res) => {
   res.json({
