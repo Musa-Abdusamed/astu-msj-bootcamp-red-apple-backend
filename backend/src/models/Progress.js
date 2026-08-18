@@ -14,39 +14,44 @@ const progressSchema = new mongoose.Schema(
       required: [true, "Batch is required"],
     },
 
-    topic: {
+    title: {
       type: String,
-      required: [true, "Topic is required"],
+      required: [true, "Progress title is required"],
       trim: true,
-      minlength: [2, "Topic must be at least 2 characters"],
-      maxlength: [100, "Topic cannot exceed 100 characters"],
+      maxlength: [200, "Title cannot exceed 200 characters"],
+    },
+
+    description: {
+      type: String,
+      trim: true,
+      maxlength: [1000, "Description cannot exceed 1000 characters"],
+    },
+
+    score: {
+      type: Number,
+      min: [0, "Score cannot be less than 0"],
+      max: [100, "Score cannot exceed 100"],
     },
 
     status: {
       type: String,
-      required: [true, "Progress status is required"],
       enum: {
-        values: [
-          "not_started",
-          "in_progress",
-          "completed",
-          "needs_improvement",
-        ],
+        values: ["not-started", "in-progress", "completed"],
         message: "Invalid progress status",
       },
-      default: "not_started",
+      default: "not-started",
     },
 
-    notes: {
+    feedback: {
       type: String,
       trim: true,
-      maxlength: [1000, "Progress notes cannot exceed 1000 characters"],
+      maxlength: [1000, "Feedback cannot exceed 1000 characters"],
     },
 
-    updatedBy: {
+    recordedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Updated by is required"],
+      required: [true, "Recorded by is required"],
     },
   },
   {
@@ -54,9 +59,7 @@ const progressSchema = new mongoose.Schema(
   }
 );
 
-progressSchema.index(
-  { studentId: 1, topic: 1 },
-  { unique: true }
-);
+progressSchema.index({ studentId: 1, batchId: 1 });
+progressSchema.index({ batchId: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Progress", progressSchema);
