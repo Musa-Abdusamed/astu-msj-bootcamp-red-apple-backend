@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom styles for glowing effects and typography gradients */
+.glow-gradient {
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15), transparent 70%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Floating animation for subtle polish */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float-slow {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 6s ease-in-out 2s infinite;
+}
