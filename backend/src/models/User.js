@@ -1,9 +1,16 @@
-
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+      required: [true, "User ID is required"],
+      unique: true,
+      immutable: true,
+      trim: true,
+    },
+
     fullName: {
       type: String,
       required: [true, "Full name is required"],
@@ -58,17 +65,29 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    avatar: {
+      type: String,
+      default: "default-avatar.png",
+    },
+
+    mustChangeCredentials: {
+      type: Boolean,
+      default: true,
+    },
+
+    passwordChangedAt: Date,
   },
   {
     timestamps: true,
   }
 );
 
-
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
+  next();
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {

@@ -31,6 +31,10 @@ const announcementSchema = new mongoose.Schema(
         message: "Invalid target audience",
       },
     },
+    targetYear: {
+      type: String, 
+      default: null,
+    },
 
     batchId: {
       type: mongoose.Schema.Types.ObjectId,
