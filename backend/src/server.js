@@ -10,6 +10,9 @@ const progressRoutes = require("./routes/progressRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
 const messageRoutes =  require ("./routes/messageRoutes")
+const attendanceRoute = require("./routes/attendanceRoutes")
+const resourceRoutes = require('./routes/resourceRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
 
 dotenv.config();
 
@@ -27,7 +30,9 @@ app.use("/api/progress", progressRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/messages", messageRoutes);
-
+app.use("/api/attendances", attendanceRoute)
+app.use('/api/resources', resourceRoutes);
+app.use('/api/schedules', scheduleRoutes);
 
 app.get("/", (req, res) => {
   res.json({
