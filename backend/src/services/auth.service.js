@@ -21,13 +21,16 @@ const createSendToken = (user, statusCode, res) => {
   res.status(statusCode).json({
     status: 'success',
     token,
+    mustChangeCredentials: user.mustChangeCredentials, // [NEW] SRS Section 4.6: Expose flag for first login
     data: {
       user: {
         id: user._id,
+        userId: user.userId, // [NEW] Added permanent custom userId as well
         fullName: user.fullName,
         email: user.email,
         role: user.role,
         batch: user.batch,
+        avatar: user.avatar, // [NEW] Added avatar support
       },
     },
   });

@@ -5,19 +5,13 @@ const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 
 
-// ======================================================
-// CHECK STUDENT ACCESS
-// ======================================================
-
 const checkStudentAccess = async (req, studentId) => {
   const student = await User.findById(studentId);
 
-  // Student does not exist
   if (!student) {
     throw new AppError("Student not found.", 404);
   }
 
-  // User must actually be a student
   if (student.role !== "student") {
     throw new AppError(
       "The selected user is not a student.",
@@ -25,17 +19,9 @@ const checkStudentAccess = async (req, studentId) => {
     );
   }
 
-  // ====================================================
-  // ADMIN
-  // ====================================================
-
   if (req.user.role === "admin") {
     return student;
   }
-
-  // ====================================================
-  // STUDENT
-  // ====================================================
 
   if (req.user.role === "student") {
     if (
@@ -50,12 +36,7 @@ const checkStudentAccess = async (req, studentId) => {
     return student;
   }
 
-  // ====================================================
-  // MENTOR
-  // ====================================================
-
   if (req.user.role === "mentor") {
-    // Student must have a batch
     if (!student.batchId) {
       throw new AppError(
         "This student is not assigned to a batch.",
@@ -63,7 +44,6 @@ const checkStudentAccess = async (req, studentId) => {
       );
     }
 
-    // Find student's batch
     const batch = await Batch.findById(student.batchId);
 
     if (!batch) {
@@ -72,8 +52,6 @@ const checkStudentAccess = async (req, studentId) => {
         404
       );
     }
-
-    // Check whether this mentor belongs to the batch
     const isMentorAssigned = batch.mentors.some(
       (mentorId) =>
         mentorId.toString() === req.user._id.toString()
@@ -89,9 +67,6 @@ const checkStudentAccess = async (req, studentId) => {
     return student;
   }
 
-  // ====================================================
-  // UNKNOWN ROLE
-  // ====================================================
 
   throw new AppError(
     "You do not have permission to access this student.",
@@ -99,10 +74,6 @@ const checkStudentAccess = async (req, studentId) => {
   );
 };
 
-
-// ======================================================
-// MARK ATTENDANCE
-// ======================================================
 
 const markAttendance = asyncHandler(
   async (req, res, next) => {
@@ -113,7 +84,6 @@ const markAttendance = asyncHandler(
       note,
     } = req.body;
 
-    // Check required fields
     if (!studentId || !date || !status) {
       return next(
         new AppError(
@@ -123,13 +93,11 @@ const markAttendance = asyncHandler(
       );
     }
 
-    // Check student access
     const student = await checkStudentAccess(
       req,
       studentId
     );
 
-    // Student must belong to a batch
     if (!student.batchId) {
       return next(
         new AppError(
@@ -139,10 +107,8 @@ const markAttendance = asyncHandler(
       );
     }
 
-    // Get batch from student's account
     const batchId = student.batchId;
 
-    // Check duplicate attendance
     const existingAttendance =
       await Attendance.findOne({
         studentId,
@@ -158,7 +124,6 @@ const markAttendance = asyncHandler(
       );
     }
 
-    // Create attendance
     const attendance = await Attendance.create({
       studentId,
       batchId,
@@ -168,7 +133,6 @@ const markAttendance = asyncHandler(
       note,
     });
 
-    // Response
     res.status(201).json({
       status: "success",
       message: "Attendance marked successfully.",
@@ -179,16 +143,10 @@ const markAttendance = asyncHandler(
   }
 );
 
-
-// ======================================================
-// UPDATE ATTENDANCE
-// ======================================================
-
 const updateAttendance = asyncHandler(
   async (req, res, next) => {
     const { status, date, note } = req.body;
 
-    // Find attendance record
     const attendance = await Attendance.findById(
       req.params.id
     );
@@ -202,8 +160,6 @@ const updateAttendance = asyncHandler(
       );
     }
 
-    // Check whether current user can access
-    // the student who owns this attendance
     await checkStudentAccess(
       req,
       attendance.studentId
@@ -241,21 +197,15 @@ const updateAttendance = asyncHandler(
 );
 
 
-// ======================================================
-// GET ONE STUDENT'S ATTENDANCE
-// ======================================================
-
 const getStudentAttendance = asyncHandler(
   async (req, res, next) => {
     const { studentId } = req.params;
 
-    // Check access
     await checkStudentAccess(
       req,
       studentId
     );
 
-    // Find attendance
     const attendance = await Attendance.find({
       studentId,
     })
@@ -284,11 +234,6 @@ const getStudentAttendance = asyncHandler(
     });
   }
 );
-
-
-// ======================================================
-// GET ATTENDANCE PERCENTAGE
-// ======================================================
 
 const getAttendancePercentage = asyncHandler(
   async (req, res, next) => {
@@ -341,11 +286,6 @@ const getAttendancePercentage = asyncHandler(
     });
   }
 );
-
-
-// ======================================================
-// EXPORT CONTROLLERS
-// ======================================================
 
 module.exports = {
   markAttendance,

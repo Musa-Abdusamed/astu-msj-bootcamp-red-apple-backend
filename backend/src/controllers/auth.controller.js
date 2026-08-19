@@ -4,7 +4,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { createSendToken } = require('../services/auth.service');
 
 const register = asyncHandler(async (req, res, next) => {
-  const { fullName, email, password } = req.body;
+  const { fullName, email, password, role, userId } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -12,10 +12,12 @@ const register = asyncHandler(async (req, res, next) => {
   }
 
   const newUser = await User.create({
+    userId: userId || `msj-usr-${Date.now()}`,
     fullName,
     email,
     password,
-    role: 'student',
+    role: role || 'student',
+    mustChangeCredentials: true 
   });
 
   createSendToken(newUser, 201, res);
@@ -66,6 +68,8 @@ const changePassword = asyncHandler(async (req, res, next) => {
   }
 
   user.password = newPassword;
+  user.mustChangeCredentials = false;
+  user.passwordChangedAt = Date.now();
   await user.save();
 
   createSendToken(user, 200, res);

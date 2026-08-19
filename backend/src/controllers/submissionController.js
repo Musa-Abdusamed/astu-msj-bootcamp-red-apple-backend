@@ -82,7 +82,7 @@ exports.getSubmissionsByAssignment = async (req, res, next)=>{
         .populate("studentId", "fullName email phone");
         return res.status(200).json({
             success: true,
-            count: this.getSubmissionsByAssignment.length,
+            count: submissions.length,
             data: submissions
         });
     } catch(err){
