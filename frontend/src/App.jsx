@@ -1,6 +1,14 @@
 import React from 'react';
-import LandingPage from './pages/landing/LandingPage';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import AppRoutes from './routes/AppRoutes';
 
 export default function App() {
-  return <LandingPage />;
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
