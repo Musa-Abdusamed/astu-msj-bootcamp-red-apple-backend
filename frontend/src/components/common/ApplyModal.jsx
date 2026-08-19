@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 
+import { adminService } from '../../api/adminService';
+
 export default function ApplyModal({ isOpen, onClose, initialTrack, onShowToast }) {
   const [track, setTrack] = useState('Frontend Track');
   const [formData, setFormData] = useState({
@@ -21,8 +23,13 @@ export default function ApplyModal({ isOpen, onClose, initialTrack, onShowToast 
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    await adminService.submitApplication({
+      ...formData,
+      trackPreference: track,
+      roleAtApplication: 'student',
+    });
     setSubmitted(true);
     if (onShowToast) {
       onShowToast(`Application submitted for ${track}! Check your email for next steps.`);

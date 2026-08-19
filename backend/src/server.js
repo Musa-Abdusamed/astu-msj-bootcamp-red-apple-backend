@@ -1,3 +1,7 @@
+
+
+
+
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -23,9 +27,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);       
-app.use("/api/users", userRoutes);      
-app.use("/api/batches", batchRoutes); 
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/batches", batchRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);

@@ -84,7 +84,6 @@ const markAsRead = asyncHandler(async (req, res, next) => {
         return next(new AppError('Message not found', 404));
     }
 
-    // Only the recipient can mark the message as read
     if (message.recipient.toString() !== req.user.id.toString()) {
         return next(
             new AppError('You are not allowed to mark this message as read', 403)

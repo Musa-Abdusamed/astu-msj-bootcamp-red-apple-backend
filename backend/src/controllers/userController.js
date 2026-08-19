@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const generateCustomId = require('../utils/generateCustomId');
 
 exports.createUser = async (req, res) => {
     const { fullName, email, password, role, phone, userId } = req.body; 
@@ -8,9 +9,10 @@ exports.createUser = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ success: false, message: "User already exists" });
         }
-        
+        const currentYear = new Date().getFullYear().toString();
+        const generatedUserId = await generateCustomId(role || 'student', currentYear);
         const newUser = await User.create({
-            userId, 
+            userId: generatedUserId,
             fullName, 
             email,
             password,
