@@ -9,6 +9,7 @@ const batchRoutes = require("./routes/batchRoutes");
 const progressRoutes = require("./routes/progressRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
+const messageRoutes =  require ("./routes/messageRoutes")
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ app.use("/api/batches", batchRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/messages", messageRoutes);
+
 
 app.get("/", (req, res) => {
   res.json({
