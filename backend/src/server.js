@@ -9,11 +9,10 @@ const batchRoutes = require("./routes/batchRoutes");
 const progressRoutes = require("./routes/progressRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
-// Updated upstream
-const messageRoutes =  require ("./routes/messageRoutes")
-const attendanceRoute = require("./routes/attendanceRoutes")
-const resourceRoutes = require('./routes/resourceRoutes');
-const scheduleRoutes = require('./routes/scheduleRoutes');
+const messageRoutes = require("./routes/messageRoutes");
+const attendanceRoute = require("./routes/attendanceRoutes");
+const resourceRoutes = require("./routes/resourceRoutes");
+const scheduleRoutes = require("./routes/scheduleRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 
 dotenv.config();
@@ -25,6 +24,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Serve uploaded files
+app.use("/uploads", express.static("uploads"));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/batches", batchRoutes);
@@ -32,11 +34,10 @@ app.use("/api/progress", progressRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/api/attendances", attendanceRoute)
-app.use('/api/resources', resourceRoutes);
-app.use('/api/schedules', scheduleRoutes);
+app.use("/api/attendances", attendanceRoute);
+app.use("/api/resources", resourceRoutes);
+app.use("/api/schedules", scheduleRoutes);
 app.use("/api/applications", applicationRoutes);
- 
 
 app.get("/", (req, res) => {
   res.json({
