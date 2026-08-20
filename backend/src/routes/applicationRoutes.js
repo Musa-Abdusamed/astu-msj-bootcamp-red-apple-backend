@@ -1,47 +1,67 @@
-const express = require('express');
+const express = require("express");
 
 const {
   submitApplication,
   getApplications,
   acceptApplication,
   rejectApplication,
-} = require('../controllers/applicationController');
+} = require("../controllers/applicationController");
 
-const { protect } = require('../middleware/auth.middleware');
-const { restrictTo } = require('../middleware/role.middleware');
-const validate = require('../middleware/validate.middleware');
+const { protect } = require("../middleware/auth.middleware");
+const { restrictTo } = require("../middleware/role.middleware");
+const validate = require("../middleware/validate.middleware");
 
 const {
   applicationValidation,
-} = require('../validators/applicationValidator');
+} = require("../validators/applicationValidator");
 
 const router = express.Router();
 
+// ======================================================
+// PUBLIC APPLICATION SUBMISSION
+// POST /api/applications
+// ======================================================
+
 router.post(
-  '/',
+  "/",
   applicationValidation,
   validate,
   submitApplication
 );
 
+// ======================================================
+// ADMIN - GET ALL APPLICATIONS
+// GET /api/applications
+// ======================================================
+
 router.get(
-  '/',
+  "/",
   protect,
-  restrictTo('admin'),
+  restrictTo("admin"),
   getApplications
 );
 
+// ======================================================
+// ADMIN - ACCEPT APPLICATION
+// PATCH /api/applications/:id/accept
+// ======================================================
+
 router.patch(
-  '/:id/accept',
+  "/:id/accept",
   protect,
-  restrictTo('admin'),
+  restrictTo("admin"),
   acceptApplication
 );
 
-router.delete(
-  '/:id/reject',
+// ======================================================
+// ADMIN - REJECT APPLICATION
+// PATCH /api/applications/:id/reject
+// ======================================================
+
+router.patch(
+  "/:id/reject",
   protect,
-  restrictTo('admin'),
+  restrictTo("admin"),
   rejectApplication
 );
 
