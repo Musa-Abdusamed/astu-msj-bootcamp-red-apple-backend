@@ -3,19 +3,13 @@ const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const { createSendToken } = require('../services/auth.service');
 
-// ======================================================
-// REGISTER
-// ======================================================
-
 const register = asyncHandler(async (req, res, next) => {
   const { fullName, email, password, role, userId } = req.body;
 
   const existingUser = await User.findOne({ email });
 
   if (existingUser) {
-    return next(
-      new AppError('An account with that email already exists.', 400)
-    );
+    return next(new AppError('An account with that email already exists.', 400));
   }
 
   const newUser = await User.create({
@@ -24,7 +18,7 @@ const register = asyncHandler(async (req, res, next) => {
     email,
     password,
     role: role || 'student',
-    mustChangeCredentials: true,
+    mustChangeCredentials: true 
   });
 
   createSendToken(newUser, 201, res);
@@ -38,26 +32,17 @@ const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(
-      new AppError('Please provide email and password.', 400)
-    );
+    return next(new AppError('Please provide email and password.', 400));
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select("+password");
 
   if (!user || !(await user.comparePassword(password))) {
-    return next(
-      new AppError('Incorrect email or password.', 401)
-    );
+    return next(new AppError('Incorrect email or password.', 401));
   }
 
   if (!user.isActive) {
-    return next(
-      new AppError(
-        'This account has been deactivated. Contact an admin.',
-        403
-      )
-    );
+    return next(new AppError('This account has been deactivated. Contact an admin.', 403));
   }
 
   createSendToken(user, 200, res);
@@ -68,15 +53,11 @@ const login = asyncHandler(async (req, res, next) => {
 // ======================================================
 
 const logout = asyncHandler(async (req, res) => {
-  res.cookie('token', 'loggedout', {
+  res.cookie("token", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   });
-
-  res.status(200).json({
-    status: 'success',
-    message: 'Logged out successfully.',
-  });
+  res.status(200).json({ status: 'success', message: 'Logged out successfully.' });
 });
 
 // ======================================================
@@ -86,9 +67,7 @@ const logout = asyncHandler(async (req, res) => {
 const getMe = asyncHandler(async (req, res) => {
   res.status(200).json({
     status: 'success',
-    data: {
-      user: req.user,
-    },
+    data: { user: req.user },
   });
 });
 
@@ -101,14 +80,8 @@ const changePassword = asyncHandler(async (req, res, next) => {
 
   const user = await User.findById(req.user.id).select('+password');
 
-  if (!user) {
-    return next(new AppError('User not found.', 404));
-  }
-
   if (!(await user.comparePassword(currentPassword))) {
-    return next(
-      new AppError('Your current password is incorrect.', 401)
-    );
+    return next(new AppError('Your current password is incorrect.', 401));
   }
 
   user.password = newPassword;
@@ -120,46 +93,28 @@ const changePassword = asyncHandler(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-// ======================================================
-// UPDATE PROFILE PICTURE
-// ======================================================
-
 const updateProfilePicture = asyncHandler(async (req, res, next) => {
   if (!req.file) {
-    return next(
-      new AppError('Please upload a profile picture.', 400)
-    );
+    return next(new AppError("Please upload a profile picture.", 400));
   }
 
   const user = await User.findById(req.user.id);
 
   if (!user) {
-    return next(new AppError('User not found.', 404));
+    return next(new AppError("User not found.", 404));
   }
 
-  // Store the uploaded filename/path in the user's avatar field
-  user.avatar = req.file.filename;
+  user.avatar = req.file.path;
 
   await user.save();
 
   res.status(200).json({
-    status: 'success',
-    message: 'Profile picture updated successfully.',
+    status: "success",
+    message: "Profile picture updated successfully.",
     data: {
-      avatar: user.avatar,
+      user,
     },
   });
 });
 
-// ======================================================
-// EXPORTS
-// ======================================================
-
-module.exports = {
-  register,
-  login,
-  logout,
-  getMe,
-  changePassword,
-  updateProfilePicture,
-};
+module.exports = { register, login, logout, getMe, changePassword, updateProfilePicture };

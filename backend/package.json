@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {
   "type": "module",
   "dependencies": {
@@ -20,3 +21,25 @@
     "start": "node src/server.js"
   }
 }
+=======
+// {
+//   "type": "module",
+//   "dependencies": {
+//     "bcryptjs": "^3.0.3",
+//     "cors": "^2.8.6",
+//     "dotenv": "^17.4.2",
+//     "express": "^5.2.1",
+//     "express-validator": "^7.3.2",
+//     "joi": "^18.2.3",
+//     "jsonwebtoken": "^9.0.3",
+//     "mongoose": "^9.9.2"
+//   },
+//   "devDependencies": {
+//     "nodemon": "^3.1.14"
+//   },
+//   "scripts": {
+//     "dev": "nodemon src/server.js",
+//     "start": "node src/server.js"
+//   }
+// }
+>>>>>>> Stashed changes

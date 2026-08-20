@@ -10,57 +10,21 @@ const {
   deleteProgress,
 } = require("../controllers/progressController");
 
-const {
-  protect,
-  restrictTo,
-} = require("../middleware/auth.middleware");
+const { protect, restrictTo } = require("../middleware/auth.middleware");
 
-
-// All progress routes require authentication
 router.use(protect);
 
-// ADMIN + MENTOR
-// Create progress
+
+router.post("/", restrictTo("admin", "mentor"), createProgress);
+
+router.get("/student/:studentId", getStudentProgress);
+
+router.get("/:id", getProgressById);
 
 
-router.post(
-  "/",
-  restrictTo("admin", "mentor"),
-  createProgress
-);
+router.patch("/:id", restrictTo("admin", "mentor"), updateProgress);
 
-// STUDENT / ADMIN / MENTOR
-// Get student's progress
 
-router.get(
-  "/student/:studentId",
-  getStudentProgress
-);
-
-// Get a specific progress record
-
-router.get(
-  "/:id",
-  getProgressById
-);
-
-// ADMIN + MENTOR
-// Update progress
-
-router.patch(
-  "/:id",
-  restrictTo("admin", "mentor"),
-  updateProgress
-);
-
-// ADMIN + MENTOR
-// Delete progress
-
-router.delete(
-  "/:id",
-  restrictTo("admin", "mentor"),
-  deleteProgress
-);
-
+router.delete("/:id", restrictTo("admin", "mentor"), deleteProgress);
 
 module.exports = router;
