@@ -42,8 +42,8 @@ export default function UserManagement() {
       adminService.getUsers({ role: roleFilter }),
       adminService.getBatches(),
     ]);
-    setUsers(usersRes.data || []);
-    setBatches(batchesRes.data || []);
+    setUsers(usersRes.data?.data || usersRes.data || []);
+    setBatches(batchesRes.data?.data || batchesRes.data || []);
   };
 
   useEffect(() => {

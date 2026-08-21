@@ -46,8 +46,8 @@ export default function AdminCurriculum() {
       adminService.getCurriculumSchedules(),
       adminService.getResources(),
     ]);
-    setSchedules(schRes.data || []);
-    setResources(resRes.data || []);
+    setSchedules(schRes.data?.schedules || []);
+    setResources(resRes.data?.resources || []);
   };
 
   useEffect(() => {

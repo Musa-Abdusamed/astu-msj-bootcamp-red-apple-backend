@@ -29,7 +29,7 @@ const createAnnouncement = asyncHandler(async (req, res, next) => {
     targetAudience,
     targetYear: targetYear || null,
     batchId: batchId || null,
-    createdBy: req.user.id,
+    createdBy: req.user._id,
     publishDate: publishDate || Date.now(),
   });
 
