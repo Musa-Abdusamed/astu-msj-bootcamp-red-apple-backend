@@ -14,23 +14,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, role = 'student') => {
     setLoading(true);
     try {
-      let userData;
-      let userToken;
-      try {
-        const response = await api.post('/auth/login', { email, password, role });
-        userData = response.data?.data?.user || response.data?.user;
-        userToken = response.data?.token;
-      } catch {
-        // Fallback for demo/offline mock login
-        userData = {
-          id: 'usr_' + Date.now(),
-          name: email.split('@')[0].toUpperCase(),
-          fullName: email.split('@')[0].toUpperCase(),
-          email,
-          role: role.toLowerCase(),
-        };
-        userToken = 'mock_jwt_token_' + Date.now();
-      }
+      const response = await api.post('/auth/login', { email, password, role });
+      const userData = response.data?.data?.user || response.data?.user;
+      const userToken = response.data?.token;
 
       setUser(userData);
       setToken(userToken);
@@ -40,29 +26,16 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: userData };
     } catch (error) {
       setLoading(false);
-      return { success: false, error: error.message };
+      return { success: false, error: error.response?.data?.message || error.message };
     }
   };
 
   const register = async (fullName, email, password, role = 'student') => {
     setLoading(true);
     try {
-      let userData;
-      let userToken;
-      try {
-        const response = await api.post('/auth/register', { fullName, email, password, role });
-        userData = response.data?.data?.user || response.data?.user;
-        userToken = response.data?.token;
-      } catch {
-        userData = {
-          id: 'usr_' + Date.now(),
-          name: fullName,
-          fullName,
-          email,
-          role: role.toLowerCase(),
-        };
-        userToken = 'mock_jwt_token_' + Date.now();
-      }
+      const response = await api.post('/auth/register', { fullName, email, password, role });
+      const userData = response.data?.data?.user || response.data?.user;
+      const userToken = response.data?.token;
 
       setUser(userData);
       setToken(userToken);
@@ -72,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: userData };
     } catch (error) {
       setLoading(false);
-      return { success: false, error: error.message };
+      return { success: false, error: error.response?.data?.message || error.message };
     }
   };
 
