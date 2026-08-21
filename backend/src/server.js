@@ -41,7 +41,6 @@ app.use("/api/schedules", scheduleRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/announcements", announcementRoutes);
 
-
 app.get("/", (req, res) => {
   res.json({
     message: "ASTU MSJ Bootcamp Backend is running",
