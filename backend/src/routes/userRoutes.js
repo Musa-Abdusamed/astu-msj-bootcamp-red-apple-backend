@@ -6,6 +6,15 @@ const userController = require('../controllers/userController');
 
 const { protect } = require('../middleware/auth.middleware');
 const { restrictTo } = require('../middleware/auth.middleware');
+const { uploadUserAvatar } = require('../middleware/uploadMiddleware');
+
+
+router.patch(
+    '/avatar', 
+    protect, 
+    uploadUserAvatar, 
+    userController.updateAvatar
+);
 
 router.use(protect);
 router.use(restrictTo('admin'));

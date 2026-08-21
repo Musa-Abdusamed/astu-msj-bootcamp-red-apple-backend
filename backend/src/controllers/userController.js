@@ -145,3 +145,41 @@ exports.deleteUser = async (req, res)=> {
         return res.status(500).json({ success: false, message: "Server Error"})
     }
 }
+
+exports.updateAvatar = async (req, res) => {
+    try {
+        // 1. Check if a file was actually uploaded by Multer
+        if (!req.file) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Please upload an image file!' 
+            });
+        }
+
+        // 2. Grab the full Cloudinary URL from the request
+        const avatarUrl = req.file.path;
+
+        // 3. Update the user in the database
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { avatar: avatarUrl },
+            { returnDocument: 'after', runValidators: true } // Use returnDocument to match your updateUser logic!
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // 4. Send success response matching your other endpoints
+        return res.status(200).json({
+            success: true,
+            message: 'Avatar updated successfully!',
+            data: {
+                avatar: updatedUser.avatar
+            }
+        });
+    } catch (err) {
+        console.error("Error updating avatar:", err);
+        return res.status(500).json({ success: false, message: "Server Error" });
+    }
+};

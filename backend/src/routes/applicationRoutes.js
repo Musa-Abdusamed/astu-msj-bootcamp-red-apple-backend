@@ -5,10 +5,15 @@ const {
   getApplications,
   acceptApplication,
   rejectApplication,
+  getApplicationStatus,
+  createApplicationSetting,
+  closeApplications,
 } = require("../controllers/applicationController");
 
 const { protect } = require("../middleware/auth.middleware");
+
 const { restrictTo } = require("../middleware/role.middleware");
+
 const validate = require("../middleware/validate.middleware");
 
 const {
@@ -16,6 +21,40 @@ const {
 } = require("../validators/applicationValidator");
 
 const router = express.Router();
+
+// ======================================================
+// PUBLIC - CHECK APPLICATION STATUS
+// GET /api/applications/status
+// ======================================================
+
+router.get(
+  "/status",
+  getApplicationStatus
+);
+
+// ======================================================
+// ADMIN - CREATE / OPEN APPLICATION PERIOD
+// POST /api/applications/settings
+// ======================================================
+
+router.post(
+  "/settings",
+  protect,
+  restrictTo("admin"),
+  createApplicationSetting
+);
+
+// ======================================================
+// ADMIN - CLOSE APPLICATIONS MANUALLY
+// PATCH /api/applications/settings/close
+// ======================================================
+
+router.patch(
+  "/settings/close",
+  protect,
+  restrictTo("admin"),
+  closeApplications
+);
 
 // ======================================================
 // PUBLIC APPLICATION SUBMISSION

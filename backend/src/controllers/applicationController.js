@@ -1,4 +1,5 @@
 const Application = require("../models/Application");
+const ApplicationSetting = require("../models/ApplicationSetting");
 const User = require("../models/User");
 const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
@@ -6,10 +7,173 @@ const generateCustomId = require("../utils/generateCustomId");
 const sendEmail = require("../utils/sendEmail");
 
 // ======================================================
+// GET APPLICATION STATUS
+// ======================================================
+
+const getApplicationStatus = asyncHandler(async (req, res) => {
+  const settings = await ApplicationSetting.findOne().sort({
+    createdAt: -1,
+  });
+
+  // No application settings have been created yet
+  if (!settings) {
+    return res.status(200).json({
+      status: "success",
+      data: {
+        isOpen: false,
+        startDate: null,
+        endDate: null,
+      },
+    });
+  }
+
+  const now = new Date();
+
+  const isOpen =
+    settings.enabled &&
+    now >= settings.startDate &&
+    now <= settings.endDate;
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      isOpen,
+      enabled: settings.enabled,
+      startDate: settings.startDate,
+      endDate: settings.endDate,
+    },
+  });
+});
+
+// ======================================================
+// CREATE / OPEN APPLICATION PERIOD - ADMIN
+// ======================================================
+
+const createApplicationSetting = asyncHandler(async (req, res, next) => {
+  const { startDate, endDate } = req.body;
+
+  if (!startDate || !endDate) {
+    return next(
+      new AppError(
+        "Start date and end date are required.",
+        400
+      )
+    );
+  }
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return next(
+      new AppError(
+        "Invalid start date or end date.",
+        400
+      )
+    );
+  }
+
+  if (end <= start) {
+    return next(
+      new AppError(
+        "Application end date must be after the start date.",
+        400
+      )
+    );
+  }
+
+  const setting = await ApplicationSetting.create({
+    enabled: true,
+    startDate: start,
+    endDate: end,
+    createdBy: req.user._id,
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Application period created successfully.",
+    data: {
+      setting,
+    },
+  });
+});
+
+// ======================================================
+// CLOSE APPLICATIONS MANUALLY - ADMIN
+// ======================================================
+
+const closeApplications = asyncHandler(async (req, res, next) => {
+  const settings = await ApplicationSetting.findOne().sort({
+    createdAt: -1,
+  });
+
+  if (!settings) {
+    return next(
+      new AppError(
+        "No application settings have been created.",
+        404
+      )
+    );
+  }
+
+  settings.enabled = false;
+
+  await settings.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Applications have been closed successfully.",
+    data: {
+      enabled: settings.enabled,
+      startDate: settings.startDate,
+      endDate: settings.endDate,
+    },
+  });
+});
+
+// ======================================================
 // SUBMIT APPLICATION
 // ======================================================
 
 const submitApplication = asyncHandler(async (req, res, next) => {
+  // ====================================================
+  // CHECK APPLICATION PERIOD
+  // ====================================================
+
+  const settings = await ApplicationSetting.findOne().sort({
+    createdAt: -1,
+  });
+
+  // No settings exist
+  if (!settings) {
+    return next(
+      new AppError(
+        "Applications are currently closed.",
+        403
+      )
+    );
+  }
+
+  const now = new Date();
+
+  const applicationOpen =
+    settings.enabled &&
+    now >= settings.startDate &&
+    now <= settings.endDate;
+
+  if (!applicationOpen) {
+    return next(
+      new AppError(
+        "Applications are currently closed.",
+        403
+      )
+    );
+  }
+
+  // ====================================================
+  // EXISTING APPLICATION LOGIC
+  // ====================================================
+
   const { email, phone } = req.body;
 
   // Check for an existing pending application
@@ -41,6 +205,7 @@ const submitApplication = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Create application
   const application = await Application.create(req.body);
 
   res.status(201).json({
@@ -310,6 +475,9 @@ ASTU MSJ Bootcamp Team
 // ======================================================
 
 module.exports = {
+  getApplicationStatus,
+  createApplicationSetting,
+  closeApplications,
   submitApplication,
   getApplications,
   acceptApplication,
