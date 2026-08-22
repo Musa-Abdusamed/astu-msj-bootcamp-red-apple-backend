@@ -41,7 +41,7 @@ exports.createUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
     try {
         const query = {};
-        if (req.query.role) {
+        if (req.query.role && req.query.role !== 'all') {
             query.role = req.query.role;
         }
         if (req.query.search) {

@@ -35,8 +35,8 @@ export default function AdminAnnouncements() {
       adminService.getAnnouncements(),
       adminService.getBatches(),
     ]);
-    setAnnouncements(annRes.data || []);
-    setBatches(batchesRes.data || []);
+    setAnnouncements(annRes.data?.announcements || annRes.data?.data?.announcements || annRes.data || []);
+    setBatches(batchesRes.data?.data || batchesRes.data || []);
   };
 
   useEffect(() => {

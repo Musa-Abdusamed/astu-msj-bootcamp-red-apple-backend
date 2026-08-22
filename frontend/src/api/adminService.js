@@ -1,53 +1,12 @@
 import api from './axios';
-import {
-  initialBatches,
-  initialUsers,
-  initialApplications,
-  initialAttendanceRecords,
-  initialAssignments,
-  initialSubmissions,
-  initialAnnouncements,
-  initialCurriculumSchedules,
-  initialResources,
-  getAdminStats,
-} from '../utils/mockData';
-
-// Local storage helper for persisting mock data during local development
-const getStored = (key, fallback) => {
-  try {
-    const item = localStorage.getItem(`msj_admin_${key}`);
-    return item ? JSON.parse(item) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-const setStored = (key, data) => {
-  try {
-    localStorage.setItem(`msj_admin_${key}`, JSON.stringify(data));
-  } catch {
-    // ignore
-  }
-};
 
 export const adminService = {
   // ==========================================
   // 1. STATS & ANALYTICS
   // ==========================================
   getStats: async () => {
-    try {
-      const res = await api.get('/admin/stats');
-      return res.data;
-    } catch {
-      const users = getStored('users', initialUsers);
-      const batches = getStored('batches', initialBatches);
-      const applications = getStored('applications', initialApplications);
-      const submissions = getStored('submissions', initialSubmissions);
-      return {
-        success: true,
-        data: getAdminStats(users, batches, applications, submissions),
-      };
-    }
+    const res = await api.get('/admin/stats');
+    return res.data;
   },
 
   // ==========================================
@@ -58,14 +17,9 @@ export const adminService = {
     return res.data;
   },
 
-  submitApplication: async (appData) => {
-    const res = await api.post('/applications', appData);
-    return res.data;
-  },
-
   updateApplicationStatus: async (id, status) => {
-    if (status.toLowerCase() === 'accepted' || status.toLowerCase() === 'accept') {
-      const res = await api.patch(`/applications/${id}/accept`);
+    if (status.toLowerCase() === 'approved' || status.toLowerCase() === 'approve') {
+      const res = await api.patch(`/applications/${id}/approve`);
       return res.data;
     } else if (status.toLowerCase() === 'rejected' || status.toLowerCase() === 'reject') {
       const res = await api.patch(`/applications/${id}/reject`);
@@ -89,8 +43,8 @@ export const adminService = {
     return res.data;
   },
 
-  updateUser: async (id, updates) => {
-    const res = await api.put(`/users/${id}`, updates);
+  updateUser: async (id, userData) => {
+    const res = await api.put(`/users/${id}`, userData);
     return res.data;
   },
 
@@ -100,7 +54,7 @@ export const adminService = {
   },
 
   // ==========================================
-  // 4. BATCHES & COHORTS
+  // 4. BATCH / COHORT MANAGEMENT
   // ==========================================
   getBatches: async () => {
     const res = await api.get('/batches');
@@ -126,76 +80,28 @@ export const adminService = {
   // 5. ATTENDANCE OVERSIGHT
   // ==========================================
   getAttendanceRecords: async (batchId, date) => {
-    try {
-      const res = await api.get('/attendance', { params: { batchId, date } });
-      return res.data;
-    } catch {
-      let records = getStored('attendance', initialAttendanceRecords);
-      if (batchId && batchId !== 'all') {
-        records = records.filter((r) => r.batchId === batchId);
-      }
-      if (date) {
-        records = records.filter((r) => r.date === date);
-      }
-      return { success: true, count: records.length, data: records };
-    }
+    const res = await api.get('/attendance', { params: { batchId, date } });
+    return res.data;
   },
 
   markAttendance: async (data) => {
-    try {
-      const res = await api.post('/attendance', data);
-      return res.data;
-    } catch {
-      const records = getStored('attendance', initialAttendanceRecords);
-      const newRecord = {
-        _id: 'att_' + Date.now(),
-        studentId: data.studentId,
-        studentName: data.studentName || 'Student',
-        batchId: data.batchId,
-        date: data.date,
-        status: data.status || 'present',
-        markedBy: 'Admin',
-        note: data.note || '',
-      };
-      // Overwrite if same student and date exists
-      const filtered = records.filter((r) => !(r.studentId === data.studentId && r.date === data.date));
-      const updated = [newRecord, ...filtered];
-      setStored('attendance', updated);
-      return { success: true, message: 'Attendance recorded', data: newRecord };
-    }
+    const res = await api.post('/attendance', data);
+    return res.data;
   },
 
   markBulkAttendance: async (batchId, date, status = 'present') => {
-    const users = getStored('users', initialUsers).filter((u) => u.role === 'student' && u.batchId === batchId);
-    const records = getStored('attendance', initialAttendanceRecords);
-    const newRecords = users.map((u) => ({
-      _id: 'att_' + Math.random().toString(36).substr(2, 9),
-      studentId: u._id,
-      studentName: u.fullName,
-      batchId,
-      date,
-      status,
-      markedBy: 'Admin',
-      note: 'Bulk marked by Admin',
-    }));
-
-    const existingFiltered = records.filter((r) => !(r.batchId === batchId && r.date === date));
-    const updated = [...newRecords, ...existingFiltered];
-    setStored('attendance', updated);
-    return { success: true, message: `Marked ${newRecords.length} students as ${status}` };
+    // Note: If bulk attendance API does not exist, this will fail. 
+    // It is up to the backend to implement this endpoint.
+    const res = await api.post('/attendance/bulk', { batchId, date, status });
+    return res.data;
   },
 
   // ==========================================
   // 6. ASSIGNMENTS & SUBMISSIONS
   // ==========================================
   getAssignments: async () => {
-    try {
-      const res = await api.get('/assignments');
-      return res.data;
-    } catch {
-      const assignments = getStored('assignments', initialAssignments);
-      return { success: true, count: assignments.length, data: assignments };
-    }
+    const res = await api.get('/assignments');
+    return res.data;
   },
 
   createAssignment: async (data) => {
@@ -217,47 +123,18 @@ export const adminService = {
   // 7. ANNOUNCEMENTS
   // ==========================================
   getAnnouncements: async () => {
-    try {
-      const res = await api.get('/announcements');
-      return res.data;
-    } catch {
-      const announcements = getStored('announcements', initialAnnouncements);
-      return { success: true, count: announcements.length, data: announcements };
-    }
+    const res = await api.get('/announcements');
+    return res.data;
   },
 
   createAnnouncement: async (data) => {
-    try {
-      const res = await api.post('/announcements', data);
-      return res.data;
-    } catch {
-      const announcements = getStored('announcements', initialAnnouncements);
-      const newAnn = {
-        _id: 'ann_' + Date.now(),
-        title: data.title,
-        content: data.content,
-        targetAudience: data.targetAudience || 'all',
-        batchId: data.batchId || null,
-        urgent: !!data.urgent,
-        author: 'Admin Office',
-        publishDate: new Date().toISOString().split('T')[0],
-      };
-      const updated = [newAnn, ...announcements];
-      setStored('announcements', updated);
-      return { success: true, message: 'Announcement broadcasted', data: newAnn };
-    }
+    const res = await api.post('/announcements', data);
+    return res.data;
   },
 
   deleteAnnouncement: async (id) => {
-    try {
-      const res = await api.delete(`/announcements/${id}`);
-      return res.data;
-    } catch {
-      const announcements = getStored('announcements', initialAnnouncements);
-      const updated = announcements.filter((a) => a._id !== id);
-      setStored('announcements', updated);
-      return { success: true, message: 'Announcement deleted' };
-    }
+    const res = await api.delete(`/announcements/${id}`);
+    return res.data;
   },
 
   // ==========================================

@@ -14,6 +14,7 @@ const attendanceRoute = require("./routes/attendanceRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
 const scheduleRoutes = require("./routes/scheduleRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const announcementRoutes = require("./routes/announcementRoutes");
 const path = require('path');
 
 dotenv.config();

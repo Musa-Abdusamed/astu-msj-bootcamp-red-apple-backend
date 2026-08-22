@@ -30,10 +30,11 @@ export default function AdminApplications() {
       adminService.getApplications(),
       adminService.getBatches(),
     ]);
-    setApplications(appsRes.data || []);
-    setBatches(batchesRes.data || []);
-    if (batchesRes.data?.length > 0) {
-      setEnrollBatchId(batchesRes.data[0]._id);
+    setApplications(appsRes.data?.data?.applications || appsRes.data?.applications || appsRes.data || []);
+    const parsedBatches = batchesRes.data?.data || batchesRes.data || [];
+    setBatches(parsedBatches);
+    if (parsedBatches.length > 0) {
+      setEnrollBatchId(parsedBatches[0]._id);
     }
   };
 
