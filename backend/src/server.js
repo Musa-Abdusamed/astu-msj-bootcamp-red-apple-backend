@@ -15,7 +15,7 @@ const resourceRoutes = require("./routes/resourceRoutes");
 const scheduleRoutes = require("./routes/scheduleRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
-const path = require('path');
+const path = require("path");
 
 dotenv.config();
 
@@ -42,7 +42,6 @@ app.use("/api/schedules", scheduleRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/public", express.static(path.join(__dirname, "../public")));
-
 
 app.get("/", (req, res) => {
   res.json({
