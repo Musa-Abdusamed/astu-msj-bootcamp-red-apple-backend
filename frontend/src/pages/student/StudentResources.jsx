@@ -23,10 +23,6 @@ export default function StudentResources() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('all');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -59,6 +55,10 @@ export default function StudentResources() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Extract unique topics for filter pills
   const topics = ['all', ...new Set(resources.map((r) => r.topic).filter(Boolean))];
