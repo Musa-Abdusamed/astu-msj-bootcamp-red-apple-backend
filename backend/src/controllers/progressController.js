@@ -16,6 +16,10 @@ const createProgress = asyncHandler(async (req, res, next) => {
 
   const student = await checkStudentAccess(req, studentId);
 
+  if (!student.batchId) {
+    return next(new AppError("This student is not assigned to a batch.", 400));
+  }
+
   const progress = await Progress.create({
     studentId,
     batchId: student.batchId,

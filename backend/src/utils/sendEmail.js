@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendEmail = async ({ to, subject, text }) => {
+const sendEmail = async ({ to, subject, text, html }) => {
   console.log("========== EMAIL CONFIG ==========");
   console.log("HOST:", process.env.SMTP_HOST);
   console.log("PORT:", process.env.SMTP_PORT);
@@ -9,27 +9,47 @@ const sendEmail = async ({ to, subject, text }) => {
   console.log("FROM:", process.env.EMAIL_FROM);
   console.log("=================================");
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASSWORD,
-    },
-  });
+  const isGmail = (process.env.SMTP_HOST || '').includes('gmail.com');
+  const port = Number(process.env.SMTP_PORT) || 465;
+  const secure = process.env.SMTP_SECURE === "true" || port === 465;
+
+  const transportConfig = isGmail
+    ? {
+        service: "gmail",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASSWORD,
+        },
+      }
+    : {
+        host: process.env.SMTP_HOST,
+        port,
+        secure,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASSWORD,
+        },
+      };
+
+  const transporter = nodemailer.createTransport(transportConfig);
 
   try {
     await transporter.verify();
 
     console.log("SMTP connection successful.");
 
-    const info = await transporter.sendMail({
+    const mailOptions = {
       from: process.env.EMAIL_FROM || process.env.SMTP_USER,
       to,
       subject,
       text,
-    });
+    };
+
+    if (html) {
+      mailOptions.html = html;
+    }
+
+    const info = await transporter.sendMail(mailOptions);
 
     console.log("Email sent successfully:", info.messageId);
 

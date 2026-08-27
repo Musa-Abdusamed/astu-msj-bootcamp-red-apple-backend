@@ -4,6 +4,7 @@ const {
   markAttendance,
   updateAttendance,
   getStudentAttendance,
+  getBatchAttendance,
   getAttendancePercentage,
 } = require("../controllers/attendanceController");
 
@@ -17,12 +18,20 @@ router.post("/", protect, restrictTo("admin", "mentor"), markAttendance);
 // Update attendance
 router.put("/:id", protect, restrictTo("admin", "mentor"), updateAttendance);
 
+// Get batch attendance (with optional ?date=YYYY-MM-DD query)
+router.get(
+  "/batch/:batchId",
+  protect,
+  restrictTo("admin", "mentor"),
+  getBatchAttendance
+);
+
 // Get student's attendance
 router.get(
   "/student/:studentId",
   protect,
   restrictTo("admin", "mentor", "student"),
-  getStudentAttendance,
+  getStudentAttendance
 );
 
 // Get attendance percentage
@@ -30,7 +39,7 @@ router.get(
   "/student/:studentId/percentage",
   protect,
   restrictTo("admin", "mentor", "student"),
-  getAttendancePercentage,
+  getAttendancePercentage
 );
 
 module.exports = router;

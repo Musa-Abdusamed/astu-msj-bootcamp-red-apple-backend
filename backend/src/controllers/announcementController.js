@@ -6,7 +6,7 @@ const AppError = require("../utils/AppError");
 // POST /api/announcements
 // Private - Admin / Mentor
 const createAnnouncement = asyncHandler(async (req, res, next) => {
-  const { title, content, targetAudience, targetYear, batchId, publishDate } =
+  const { title, content, targetAudience, targetYear, batchId, publishDate, urgent } =
     req.body;
 
   // Basic validation
@@ -29,6 +29,7 @@ const createAnnouncement = asyncHandler(async (req, res, next) => {
     targetAudience,
     targetYear: targetYear || null,
     batchId: batchId || null,
+    urgent: Boolean(urgent),
     createdBy: req.user._id,
     publishDate: publishDate || Date.now(),
   });
@@ -135,6 +136,10 @@ const updateAnnouncement = asyncHandler(async (req, res, next) => {
 
   if (publishDate !== undefined) {
     announcement.publishDate = publishDate;
+  }
+
+  if (req.body.urgent !== undefined) {
+    announcement.urgent = Boolean(req.body.urgent);
   }
 
   await announcement.save();

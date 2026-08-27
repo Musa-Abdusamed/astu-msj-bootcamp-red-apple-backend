@@ -4,7 +4,6 @@ const Batch = require("../models/Batch");
 const AppError = require("../utils/AppError");
 const asyncHandler = require("../utils/asyncHandler");
 
-
 const checkStudentAccess = async (req, studentId) => {
   const student = await User.findById(studentId);
 
@@ -13,10 +12,7 @@ const checkStudentAccess = async (req, studentId) => {
   }
 
   if (student.role !== "student") {
-    throw new AppError(
-      "The selected user is not a student.",
-      400
-    );
+    throw new AppError("The selected user is not a student.", 400);
   }
 
   if (req.user.role === "admin") {
@@ -24,272 +20,188 @@ const checkStudentAccess = async (req, studentId) => {
   }
 
   if (req.user.role === "student") {
-    if (
-      req.user._id.toString() !== student._id.toString()
-    ) {
-      throw new AppError(
-        "You can only access your own attendance.",
-        403
-      );
+    if (req.user._id.toString() !== student._id.toString()) {
+      throw new AppError("You can only access your own attendance.", 403);
     }
-
     return student;
   }
 
   if (req.user.role === "mentor") {
     if (!student.batchId) {
-      throw new AppError(
-        "This student is not assigned to a batch.",
-        403
-      );
+      throw new AppError("This student is not assigned to a batch.", 403);
     }
 
     const batch = await Batch.findById(student.batchId);
-
     if (!batch) {
-      throw new AppError(
-        "Student's batch not found.",
-        404
-      );
+      throw new AppError("Student's batch not found.", 404);
     }
+
     const isMentorAssigned = batch.mentors.some(
-      (mentorId) =>
-        mentorId.toString() === req.user._id.toString()
+      (mentorId) => mentorId.toString() === req.user._id.toString()
     );
 
     if (!isMentorAssigned) {
-      throw new AppError(
-        "You are not assigned to this student's batch.",
-        403
-      );
+      throw new AppError("You are not assigned to this student's batch.", 403);
     }
 
     return student;
   }
 
-
-  throw new AppError(
-    "You do not have permission to access this student.",
-    403
-  );
+  throw new AppError("You do not have permission to access this student.", 403);
 };
 
+const markAttendance = asyncHandler(async (req, res, next) => {
+  const { studentId, date, status, note } = req.body;
 
-const markAttendance = asyncHandler(
-  async (req, res, next) => {
-    const {
-      studentId,
-      date,
-      status,
-      note,
-    } = req.body;
-
-    if (!studentId || !date || !status) {
-      return next(
-        new AppError(
-          "Student, date, and status are required.",
-          400
-        )
-      );
-    }
-
-    const student = await checkStudentAccess(
-      req,
-      studentId
-    );
-
-    if (!student.batchId) {
-      return next(
-        new AppError(
-          "This student is not assigned to a batch.",
-          400
-        )
-      );
-    }
-
-    const batchId = student.batchId;
-
-    const existingAttendance =
-      await Attendance.findOne({
-        studentId,
-        date,
-      });
-
-    if (existingAttendance) {
-      return next(
-        new AppError(
-          "Attendance has already been recorded for this student on this date.",
-          409
-        )
-      );
-    }
-
-    const attendance = await Attendance.create({
-      studentId,
-      batchId,
-      date,
-      status,
-      markedBy: req.user._id,
-      note,
-    });
-
-    res.status(201).json({
-      status: "success",
-      message: "Attendance marked successfully.",
-      data: {
-        attendance,
-      },
-    });
+  if (!studentId || !date || !status) {
+    return next(new AppError("Student, date, and status are required.", 400));
   }
-);
 
-const updateAttendance = asyncHandler(
-  async (req, res, next) => {
-    const { status, date, note } = req.body;
+  const student = await checkStudentAccess(req, studentId);
 
-    const attendance = await Attendance.findById(
-      req.params.id
-    );
+  if (!student.batchId) {
+    return next(new AppError("This student is not assigned to a batch.", 400));
+  }
 
-    if (!attendance) {
-      return next(
-        new AppError(
-          "Attendance record not found.",
-          404
-        )
-      );
-    }
+  const batchId = student.batchId;
 
-    await checkStudentAccess(
-      req,
-      attendance.studentId
-    );
+  // Check if attendance already recorded for this student on this date
+  let attendance = await Attendance.findOne({
+    studentId,
+    date,
+  });
 
-    // Update status if provided
-    if (status !== undefined) {
-      attendance.status = status;
-    }
-
-    // Update date if provided
-    if (date !== undefined) {
-      attendance.date = date;
-    }
-
-    // Update note if provided
-    if (note !== undefined) {
-      attendance.note = note;
-    }
-
-    // Record who made the latest change
+  if (attendance) {
+    // Upsert: update existing attendance for today
+    attendance.status = status;
+    if (note !== undefined) attendance.note = note;
     attendance.markedBy = req.user._id;
-
-    // Save changes
     await attendance.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       status: "success",
-      message: "Attendance updated successfully.",
+      message: "Attendance record updated successfully.",
+      data: { attendance },
+    });
+  }
+
+  // Create new record
+  attendance = await Attendance.create({
+    studentId,
+    batchId,
+    date,
+    status,
+    markedBy: req.user._id,
+    note,
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Attendance marked successfully.",
+    data: { attendance },
+  });
+});
+
+const updateAttendance = asyncHandler(async (req, res, next) => {
+  const { status, date, note } = req.body;
+
+  const attendance = await Attendance.findById(req.params.id);
+
+  if (!attendance) {
+    return next(new AppError("Attendance record not found.", 404));
+  }
+
+  await checkStudentAccess(req, attendance.studentId);
+
+  if (status !== undefined) attendance.status = status;
+  if (date !== undefined) attendance.date = date;
+  if (note !== undefined) attendance.note = note;
+  attendance.markedBy = req.user._id;
+
+  await attendance.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Attendance updated successfully.",
+    data: { attendance },
+  });
+});
+
+const getStudentAttendance = asyncHandler(async (req, res, next) => {
+  const { studentId } = req.params;
+
+  await checkStudentAccess(req, studentId);
+
+  const attendance = await Attendance.find({ studentId })
+    .populate("studentId", "fullName email role batchId")
+    .populate("batchId", "name startDate endDate")
+    .populate("markedBy", "fullName email role")
+    .sort({ date: -1 });
+
+  res.status(200).json({
+    status: "success",
+    results: attendance.length,
+    data: { attendance },
+  });
+});
+
+const getBatchAttendance = asyncHandler(async (req, res, next) => {
+  const { batchId } = req.params;
+  const { date } = req.query;
+
+  const query = { batchId };
+  if (date) {
+    query.date = date;
+  }
+
+  const attendance = await Attendance.find(query)
+    .populate("studentId", "fullName email userId phone")
+    .populate("markedBy", "fullName email")
+    .sort({ date: -1 });
+
+  res.status(200).json({
+    status: "success",
+    results: attendance.length,
+    data: { attendance },
+  });
+});
+
+const getAttendancePercentage = asyncHandler(async (req, res, next) => {
+  const { studentId } = req.params;
+
+  await checkStudentAccess(req, studentId);
+
+  const attendance = await Attendance.find({ studentId });
+  const totalSessions = attendance.length;
+
+  if (totalSessions === 0) {
+    return res.status(200).json({
+      status: "success",
       data: {
-        attendance,
+        percentage: 0,
+        presentSessions: 0,
+        totalSessions: 0,
       },
     });
   }
-);
 
+  const presentSessions = attendance.filter((r) => r.status === "present").length;
+  const percentage = (presentSessions / totalSessions) * 100;
 
-const getStudentAttendance = asyncHandler(
-  async (req, res, next) => {
-    const { studentId } = req.params;
-
-    await checkStudentAccess(
-      req,
-      studentId
-    );
-
-    const attendance = await Attendance.find({
-      studentId,
-    })
-      .populate(
-        "studentId",
-        "fullName email role batchId"
-      )
-      .populate(
-        "batchId",
-        "name startDate endDate"
-      )
-      .populate(
-        "markedBy",
-        "fullName email role"
-      )
-      .sort({
-        date: -1,
-      });
-
-    res.status(200).json({
-      status: "success",
-      results: attendance.length,
-      data: {
-        attendance,
-      },
-    });
-  }
-);
-
-const getAttendancePercentage = asyncHandler(
-  async (req, res, next) => {
-    const { studentId } = req.params;
-
-    // Check access
-    await checkStudentAccess(
-      req,
-      studentId
-    );
-
-    // Get student's attendance
-    const attendance = await Attendance.find({
-      studentId,
-    });
-
-    // Total sessions
-    const totalSessions = attendance.length;
-
-    // No attendance records
-    if (totalSessions === 0) {
-      return res.status(200).json({
-        status: "success",
-        data: {
-          percentage: 0,
-          presentSessions: 0,
-          totalSessions: 0,
-        },
-      });
-    }
-
-    // Count present sessions
-    const presentSessions = attendance.filter(
-      (record) => record.status === "present"
-    ).length;
-
-    // Calculate percentage
-    const percentage =
-      (presentSessions / totalSessions) * 100;
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        percentage: Number(
-          percentage.toFixed(2)
-        ),
-        presentSessions,
-        totalSessions,
-      },
-    });
-  }
-);
+  res.status(200).json({
+    status: "success",
+    data: {
+      percentage: Number(percentage.toFixed(2)),
+      presentSessions,
+      totalSessions,
+    },
+  });
+});
 
 module.exports = {
   markAttendance,
   updateAttendance,
   getStudentAttendance,
+  getBatchAttendance,
   getAttendancePercentage,
 };

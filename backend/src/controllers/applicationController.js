@@ -332,14 +332,13 @@ const acceptApplication = asyncHandler(async (req, res, next) => {
   // SEND ACCEPTANCE EMAIL
   // ====================================================
 
+  // ====================================================
+  // SEND ACCEPTANCE EMAIL
+  // ====================================================
+
   try {
-    await sendEmail({
-      to: application.email,
-
-      subject:
-        "ASTU MSJ Bootcamp - Application Accepted",
-
-      text: `
+    const emailSubject = "ASTU MSJ Bootcamp - Application Accepted (Login Credentials)";
+    const emailText = `
 Dear ${application.fullName},
 
 Congratulations!
@@ -349,26 +348,73 @@ Your application to the ASTU MSJ Bootcamp has been accepted.
 Your account has been created.
 
 --------------------------------
-ACCOUNT INFORMATION
+YOUR LOGIN CREDENTIALS
 --------------------------------
 
-Custom ID: ${user.userId}
-Email: ${user.email}
-Temporary Password: ${temporaryPassword}
+Unique ID: ${user.userId}
+One-Time Password: ${temporaryPassword}
 Role: ${user.role}
 
 --------------------------------
+LOGIN INSTRUCTIONS:
+--------------------------------
+1. Go to the ASTU MSJ Portal Login page.
+2. Select your role (${user.role.toUpperCase()}).
+3. Enter your Unique ID: ${user.userId}
+4. Enter your One-Time Password: ${temporaryPassword}
+5. Once you sign in, you will be automatically redirected to the password changing section to set your new permanent password.
 
-Please log in using the information above.
-
-For security reasons, you must change your password after your first login.
-
-Do not share your login credentials with anyone.
+For security reasons, you must change your one-time password immediately. Do not share your login credentials with anyone.
 
 Welcome to the ASTU MSJ Bootcamp!
 
 ASTU MSJ Bootcamp Team
-`,
+`;
+
+    const emailHtml = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b; background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+  <div style="text-align: center; margin-bottom: 24px;">
+    <h1 style="color: #4f46e5; margin: 0; font-size: 24px;">ASTU MSJ Bootcamp</h1>
+    <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Summer Cohort Admission</p>
+  </div>
+
+  <div style="background-color: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Congratulations, ${application.fullName}! 🎉</h2>
+    <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+      We are pleased to inform you that your application to the <strong>ASTU MSJ Bootcamp</strong> has been accepted. Your student account has been created.
+    </p>
+
+    <div style="background-color: #f1f5f9; border-left: 4px solid #4f46e5; padding: 16px; margin: 20px 0; border-radius: 4px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 15px; color: #1e293b;">Your Login Credentials</h3>
+      <p style="margin: 6px 0; font-size: 14px;"><strong>Unique ID:</strong> <span style="font-family: monospace; font-size: 15px; font-weight: bold; color: #4f46e5; background: #e0e7ff; padding: 2px 6px; border-radius: 4px;">${user.userId}</span></p>
+      <p style="margin: 6px 0; font-size: 14px;"><strong>One-Time Password:</strong> <span style="font-family: monospace; font-size: 15px; font-weight: bold; color: #0f172a; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${temporaryPassword}</span></p>
+      <p style="margin: 6px 0; font-size: 14px;"><strong>Role:</strong> <span style="text-transform: capitalize;">${user.role}</span></p>
+    </div>
+
+    <h4 style="color: #0f172a; margin-bottom: 8px;">How to Sign In:</h4>
+    <ol style="font-size: 14px; line-height: 1.6; color: #334155; padding-left: 20px;">
+      <li>Navigate to the login portal.</li>
+      <li>Select the <strong>${user.role.toUpperCase()}</strong> role.</li>
+      <li>Log in using your <strong>Unique ID</strong> (<code>${user.userId}</code>) and <strong>One-Time Password</strong>.</li>
+      <li>You will be directed straight to the password changing page to set your permanent password.</li>
+    </ol>
+
+    <div style="margin-top: 20px; padding: 12px; background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; font-size: 13px; color: #92400e;">
+      ⚠️ <strong>Important:</strong> For security reasons, please change your one-time password immediately after logging in. Never share your credentials.
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #94a3b8;">
+    &copy; 2026 ASTU MSJ Bootcamp. All rights reserved.
+  </div>
+</div>
+`;
+
+    await sendEmail({
+      to: application.email,
+      subject: emailSubject,
+      text: emailText,
+      html: emailHtml,
     });
   } catch (emailError) {
     // Email failed.
@@ -402,6 +448,14 @@ ASTU MSJ Bootcamp Team
       userId: user.userId,
       email: user.email,
       role: user.role,
+      user: {
+        id: user._id,
+        _id: user._id,
+        userId: user.userId,
+        email: user.email,
+        role: user.role,
+        fullName: user.fullName,
+      },
     },
   });
 });

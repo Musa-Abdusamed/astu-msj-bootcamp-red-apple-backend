@@ -8,8 +8,6 @@ const {
   getMe,
   changePassword,
   updateProfilePicture,
-  forgotPassword,
-  resetPassword,
 } = require("../controllers/auth.controller");
 
 const { protect } = require("../middleware/auth.middleware");
@@ -43,10 +41,13 @@ const registerValidation = [
 // ======================================================
 
 const loginValidation = [
-  body("email")
-    .isEmail()
-    .withMessage("A valid email is required")
-    .normalizeEmail(),
+  body().custom((value) => {
+    const id = value.userId || value.uniqueId || value.identifier || value.email;
+    if (!id || typeof id !== 'string' || !id.trim()) {
+      throw new Error("Unique ID is required");
+    }
+    return true;
+  }),
 
   body("password")
     .notEmpty()
@@ -68,50 +69,10 @@ const changePasswordValidation = [
 ];
 
 // ======================================================
-// FORGOT PASSWORD VALIDATION
+// AUTH ROUTES
 // ======================================================
 
-const forgotPasswordValidation = [
-  body("email")
-    .isEmail()
-    .withMessage("A valid email is required")
-    .normalizeEmail(),
-];
-
-// ======================================================
-// RESET PASSWORD VALIDATION
-// ======================================================
-
-const resetPasswordValidation = [
-  body("email")
-    .isEmail()
-    .withMessage("A valid email is required")
-    .normalizeEmail(),
-
-  body("otp")
-    .trim()
-    .isLength({ min: 6, max: 6 })
-    .withMessage("OTP must be 6 digits")
-    .isNumeric()
-    .withMessage("OTP must contain only numbers"),
-
-  body("newPassword")
-    .isLength({ min: 8 })
-    .withMessage("New password must be at least 8 characters long"),
-
-  body("confirmPassword")
-    .notEmpty()
-    .withMessage("Confirm password is required")
-    .custom((value, { req }) => {
-      return value === req.body.newPassword;
-    })
-    .withMessage("Passwords do not match"),
-];
-
-// ======================================================
-// REGISTER
-// ======================================================
-
+// Register
 router.post(
   "/register",
   registerValidation,
@@ -119,10 +80,7 @@ router.post(
   register
 );
 
-// ======================================================
-// LOGIN
-// ======================================================
-
+// Login
 router.post(
   "/login",
   loginValidation,
@@ -130,30 +88,21 @@ router.post(
   login
 );
 
-// ======================================================
-// LOGOUT
-// ======================================================
-
+// Logout
 router.post(
   "/logout",
   protect,
   logout
 );
 
-// ======================================================
-// GET CURRENT USER
-// ======================================================
-
+// Get current user
 router.get(
   "/me",
   protect,
   getMe
 );
 
-// ======================================================
-// CHANGE PASSWORD
-// ======================================================
-
+// Change password
 router.patch(
   "/change-password",
   protect,
@@ -171,34 +120,6 @@ router.patch(
   protect,
   upload.single("profilePicture"),
   updateProfilePicture
-);
-
-// ======================================================
-// FORGOT PASSWORD
-// ======================================================
-
-// User enters email.
-// Server sends OTP to their email.
-
-router.post(
-  "/forgot-password",
-  forgotPasswordValidation,
-  validate,
-  forgotPassword
-);
-
-// ======================================================
-// RESET PASSWORD
-// ======================================================
-
-// User provides:
-// email + OTP + new password + confirm password
-
-router.post(
-  "/reset-password",
-  resetPasswordValidation,
-  validate,
-  resetPassword
 );
 
 module.exports = router;

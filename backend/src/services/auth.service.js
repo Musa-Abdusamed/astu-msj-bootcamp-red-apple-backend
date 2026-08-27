@@ -25,12 +25,14 @@ const createSendToken = (user, statusCode, res) => {
     data: {
       user: {
         id: user._id,
+        _id: user._id,
         userId: user.userId, // [NEW] Added permanent custom userId as well
         fullName: user.fullName,
         email: user.email,
         role: user.role,
         batch: user.batch,
         avatar: user.avatar, // [NEW] Added avatar support
+        mustChangeCredentials: user.mustChangeCredentials,
       },
     },
   });
