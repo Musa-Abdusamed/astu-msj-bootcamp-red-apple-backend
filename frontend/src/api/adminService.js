@@ -135,6 +135,11 @@ export const adminService = {
     return res.data;
   },
 
+  updateAttendance: async (id, data) => {
+    const res = await api.put(`/attendances/${id}`, data);
+    return res.data;
+  },
+
   markBulkAttendance: async (batchId, date, status = 'present') => {
     const res = await api.post('/attendances', { batchId, date, status });
     return res.data;

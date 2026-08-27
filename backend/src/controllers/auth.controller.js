@@ -38,18 +38,21 @@ const register = asyncHandler(async (req, res, next) => {
 // ======================================================
 
 const login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, userId, password } = req.body;
+  const identifier = email || userId;
 
-  if (!email || !password) {
+  if (!identifier || !password) {
     return next(
-      new AppError("Please provide email and password.", 400)
+      new AppError("Please provide email/userId and password.", 400)
     );
   }
 
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({
+    $or: [{ email: identifier }, { userId: identifier }]
+  }).select("+password");
 
   if (!user || !(await user.comparePassword(password))) {
-    return next(new AppError("Incorrect email or password.", 401));
+    return next(new AppError("Incorrect credentials.", 401));
   }
 
   if (!user.isActive) {

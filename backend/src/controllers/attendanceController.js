@@ -235,6 +235,25 @@ const getStudentAttendance = asyncHandler(
   }
 );
 
+const getBatchAttendance = asyncHandler(
+  async (req, res, next) => {
+    const { batchId } = req.params;
+    const { date } = req.query;
+
+    const query = { batchId };
+    if (date) {
+      query.date = date;
+    }
+
+    const attendance = await Attendance.find(query);
+
+    res.status(200).json({
+      status: "success",
+      data: attendance,
+    });
+  }
+);
+
 const getAttendancePercentage = asyncHandler(
   async (req, res, next) => {
     const { studentId } = req.params;
@@ -291,5 +310,6 @@ module.exports = {
   markAttendance,
   updateAttendance,
   getStudentAttendance,
+  getBatchAttendance,
   getAttendancePercentage,
 };
