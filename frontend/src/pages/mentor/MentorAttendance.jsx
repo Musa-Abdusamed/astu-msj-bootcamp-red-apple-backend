@@ -147,12 +147,21 @@ export default function MentorAttendance() {
 
       for (const st of students) {
         const record = attendanceMap[st._id] || { status: 'absent', note: '' };
-        await mentorService.markAttendance({
-          studentId: st._id,
-          date: selectedDate,
-          status: record.status,
-          note: record.note,
-        });
+        
+        if (record.recordId) {
+          await mentorService.updateAttendance(record.recordId, {
+            status: record.status,
+            date: selectedDate,
+            note: record.note,
+          });
+        } else {
+          await mentorService.markAttendance({
+            studentId: st._id,
+            date: selectedDate,
+            status: record.status,
+            note: record.note,
+          });
+        }
         savedCount++;
       }
 
