@@ -5,25 +5,25 @@ export default function About() {
   const stats = [
     {
       icon: Clock,
-      value: '3 weeks',
-      label: 'Intensive Program',
+      value: '3 Months',
+      label: 'Intensive Program (12 Wks)',
     },
     {
       icon: Zap,
       value: '100%',
-      label: 'Hands-On Projects',
+      label: 'Hands-On Labs & Capstones',
     },
     {
       icon: Users,
-      value: '1:8',
-      label: 'Mentor-Student Ratio',
+      value: '1:5',
+      label: 'Mentor-to-Student Ratio',
     },
   ];
 
   return (
     <section id="about" className="py-20 bg-white border-t border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Section Header Tag */}
         <div className="text-left mb-4">
           <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
@@ -32,20 +32,20 @@ export default function About() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left Column: Heading & Paragraphs */}
           <div className="lg:col-span-7 space-y-6">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
-              Built for the next generation of <br className="hidden sm:inline" />
-              Ethiopian tech talent
+              Empowering the Next Generation of <br className="hidden sm:inline" />
+              Ethiopian Software Engineers
             </h2>
 
             <div className="space-y-4 text-base text-slate-600 leading-relaxed">
               <p>
-                The ASTU MSJ Summer Bootcamp is a flagship initiative of the Microsoft Student Group at Adama Science & Technology University. Our mission: accelerate technical skills through real-world project experience, guided by industry professionals who have shipped production software.
+                The <strong>ASTU MSJ Summer Bootcamp</strong> is a student driven engineering initiative organized by the <strong>Adama Science and Technology University Muslim Students Jemea (ASTU MSJ)</strong>. Our mission is to accelerate technical excellence through project-driven software development, industry-level mentorship, and collaborative problem-solving.
               </p>
               <p>
-                Participants don't just learn — they build. Every track culminates in a portfolio-ready capstone project reviewed by mentors with hiring experience at leading tech companies.
+                With our dedicated <strong>1:5 mentor-to-student ratio</strong>, every participant receives individualized code reviews, weekly 1-on-1 milestone evaluations, and guidance to build production-grade web applications.
               </p>
             </div>
           </div>

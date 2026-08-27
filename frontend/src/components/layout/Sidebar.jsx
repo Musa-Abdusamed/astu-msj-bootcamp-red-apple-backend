@@ -27,7 +27,35 @@ export default function Sidebar() {
     { name: 'Assignments & Grades', path: '/admin/assignments', icon: FileCode2 },
     { name: 'Announcements', path: '/admin/announcements', icon: Megaphone },
     { name: 'Curriculum & Resources', path: '/admin/curriculum', icon: BookOpen },
+    { name: 'Messages', path: '/messages', icon: BookOpen },
+    { name: 'Settings', path: '/settings', icon: ShieldCheck },
   ];
+
+  const mentorLinks = [
+    { name: 'Overview', path: '/mentor', icon: LayoutDashboard },
+    { name: 'My Batches', path: '/mentor/batches', icon: Layers },
+    { name: 'Attendance', path: '/mentor/attendance', icon: CalendarCheck },
+    { name: 'Assignments & Grades', path: '/mentor/assignments', icon: FileCode2 },
+    { name: 'Student Progress', path: '/mentor/progress', icon: UserCheck },
+    { name: 'Announcements', path: '/mentor/announcements', icon: Megaphone },
+    { name: 'Curriculum & Resources', path: '/mentor/resources', icon: BookOpen },
+    { name: 'Messages', path: '/messages', icon: BookOpen },
+    { name: 'Settings', path: '/settings', icon: ShieldCheck },
+  ];
+
+  const studentLinks = [
+    { name: 'Overview', path: '/student', icon: LayoutDashboard },
+    { name: 'Assignments', path: '/student/assignments', icon: FileCode2 },
+    { name: 'Attendance', path: '/student/attendance', icon: CalendarCheck },
+    { name: 'Progress', path: '/student/progress', icon: UserCheck },
+    { name: 'Announcements', path: '/student/announcements', icon: Megaphone },
+    { name: 'Curriculum & Resources', path: '/student/resources', icon: BookOpen },
+    { name: 'Messages', path: '/messages', icon: BookOpen },
+    { name: 'Settings', path: '/settings', icon: ShieldCheck },
+  ];
+
+  const links = role === 'admin' ? adminLinks : role === 'mentor' ? mentorLinks : studentLinks;
+
 
   return (
     <aside className="w-64 bg-slate-900 text-white min-h-screen flex flex-col justify-between p-4 border-r border-slate-800 shrink-0 sticky top-0 h-screen overflow-y-auto">
@@ -41,12 +69,12 @@ export default function Sidebar() {
             <div className="text-sm font-bold text-white flex items-center gap-1.5">
               <span>ASTU MSJ</span>
               <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase">
-                Admin
+                {role}
               </span>
             </div>
             <div className="text-[11px] text-slate-400 flex items-center gap-1">
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <span>Control Panel</span>
+              <span className="capitalize">{role} Panel</span>
             </div>
           </div>
         </div>
@@ -56,13 +84,13 @@ export default function Sidebar() {
           Management Modules
         </div>
         <nav className="space-y-1">
-          {adminLinks.map((link) => {
+          {links.map((link) => {
             const Icon = link.icon;
             return (
               <NavLink
                 key={link.name}
                 to={link.path}
-                end={link.path === '/admin'}
+                end={link.path === '/admin' || link.path === '/mentor' || link.path === '/student'}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
                     isActive
@@ -82,12 +110,16 @@ export default function Sidebar() {
       {/* User Profile & Sign Out */}
       <div className="pt-4 mt-6 border-t border-slate-800 space-y-3">
         <div className="px-3 py-2 rounded-xl bg-slate-800/40 border border-slate-800/80 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center border border-indigo-500/30">
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center border border-indigo-500/30 font-mono overflow-hidden shrink-0">
+            {user?.avatar && user.avatar !== 'default-avatar.png' ? (
+              <img src={`http://localhost:5000/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              user?.fullName ? user.fullName.charAt(0).toUpperCase() : (user?.userId ? user.userId.charAt(0).toUpperCase() : 'U')
+            )}
           </div>
           <div className="overflow-hidden">
-            <div className="text-xs font-bold text-white truncate">{user?.name || user?.fullName || 'Nafyad (Lead Admin)'}</div>
-            <div className="text-[10px] text-slate-400 truncate">{user?.email || 'admin@astu.edu.et'}</div>
+            <div className="text-xs font-bold text-white truncate">{user?.fullName || user?.name || 'User'}</div>
+            <div className="text-[10px] text-indigo-400 font-mono truncate">{user?.userId || user?.email || 'N/A'}</div>
           </div>
         </div>
         <button

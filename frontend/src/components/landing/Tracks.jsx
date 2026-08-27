@@ -6,39 +6,39 @@ export default function Tracks({ onSelectTrack }) {
     {
       id: 'frontend',
       title: 'Frontend Track',
-      duration: '3 Weeks',
+      duration: '3 Months (12 Weeks)',
       icon: Code2,
       accentColor: 'border-indigo-600',
       iconBg: 'bg-indigo-600',
       buttonBg: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200',
-      description: 'Master the visual layer of the web. Build responsive, accessible, interactive UIs entirely from scratch.',
-      tags: ['HTML & CSS', 'JavaScript (ES6+)', 'React', 'Tailwind CSS'],
+      description: 'Master modern frontend architecture with React, responsive Tailwind CSS, state management, and accessible UI engineering.',
+      tags: ['HTML5 & Modern CSS', 'JavaScript (ES6+)', 'React 18', 'Tailwind CSS', 'Vite'],
       capstones: '5 capstone projects',
       certificate: 'Certificate included',
     },
     {
       id: 'backend',
       title: 'Backend Engineering',
-      duration: '3 Weeks',
+      duration: '3 Months (12 Weeks)',
       icon: Server,
       accentColor: 'border-blue-600',
       iconBg: 'bg-blue-600',
       buttonBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-200',
-      description: 'Build scalable APIs and server-side applications that power modern web products used daily.',
-      tags: ['Node.js', 'Express.js', 'MongoDB', 'REST APIs'],
+      description: 'Design scalable RESTful APIs, database architectures with MongoDB, JWT authentication, and secure server-side systems.',
+      tags: ['Node.js', 'Express.js', 'MongoDB Atlas', 'Mongoose', 'JWT & Security'],
       capstones: '4 capstone projects',
       certificate: 'Certificate included',
     },
     {
       id: 'fullstack',
       title: 'Full-Stack MERN',
-      duration: '3 Weeks',
+      duration: '3 Months (12 Weeks)',
       icon: Layers,
       accentColor: 'border-cyan-500',
       iconBg: 'bg-cyan-500',
       buttonBg: 'bg-sky-500 hover:bg-sky-600 shadow-sky-200',
-      description: 'End-to-end web architecture. Build, connect, and deploy complete production-ready applications.',
-      tags: ['MongoDB', 'Express.js', 'React', 'Node.js'],
+      description: 'End-to-end full-stack mastery. Build, connect, and deploy complete production web applications from database to frontend UI.',
+      tags: ['MongoDB', 'Express.js', 'React', 'Node.js', 'Full-Stack CI/CD'],
       capstones: '6 capstone projects',
       certificate: 'Certificate included',
     },
@@ -57,7 +57,7 @@ export default function Tracks({ onSelectTrack }) {
             Choose your track
           </h2>
           <p className="text-base text-slate-600">
-            Three focused learning paths, each built around an industry-grade curriculum and real project delivery.
+            Three 3-month comprehensive tracks, each built around hands-on lab syllabi and a 1:5 mentorship model.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export default function Tracks({ onSelectTrack }) {
                     <div className={`w-11 h-11 rounded-xl ${track.iconBg} flex items-center justify-center text-white shadow-sm`}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                       {track.duration}
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export default function Tracks({ onSelectTrack }) {
 
                   <button
                     onClick={() => onSelectTrack && onSelectTrack(track.title)}
-                    className={`w-full py-3 rounded-xl text-sm font-semibold text-white ${track.buttonBg} transition-all duration-200 shadow-sm active:scale-[0.98]`}
+                    className={`w-full py-3 rounded-xl text-sm font-semibold text-white ${track.buttonBg} transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer`}
                   >
                     Apply for Track
                   </button>
