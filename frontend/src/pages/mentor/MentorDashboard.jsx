@@ -1,208 +1,260 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { mentorService } from '../../api/mentorService';
 import {
+  Layers,
+  FileCode2,
+  CalendarCheck,
   Users,
-  ClipboardCheck,
-  FileText,
+  ArrowRight,
+  Sparkles,
+  Award,
+  BookOpen,
   Megaphone,
-  TrendingUp,
-  CalendarDays,
-} from "lucide-react";
+  AlertCircle,
+  Calendar,
+} from 'lucide-react';
 
 export default function MentorDashboard() {
-  const stats = [
-    {
-      title: "My Students",
-      value: "24",
-      icon: Users,
-      description: "Students in your batch",
-    },
-    {
-      title: "Attendance",
-      value: "87%",
-      icon: ClipboardCheck,
-      description: "Average attendance",
-    },
-    {
-      title: "Assignments",
-      value: "12",
-      icon: FileText,
-      description: "Active assignments",
-    },
-    {
-      title: "Announcements",
-      value: "5",
-      icon: Megaphone,
-      description: "Recent announcements",
-    },
-  ];
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalBatches: 0,
+    totalStudents: 0,
+    totalAssignments: 0,
+    activeBatches: [],
+  });
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMentorStats = async () => {
+      try {
+        setLoading(true);
+        const [batchesRes, studentsRes, annRes] = await Promise.allSettled([
+          mentorService.getBatches(),
+          mentorService.getStudents('student'),
+          mentorService.getAnnouncements(),
+        ]);
+
+        const batches = (batchesRes.status === 'fulfilled' ? batchesRes.value.data || batchesRes.value : []) || [];
+        const students = (studentsRes.status === 'fulfilled' ? studentsRes.value.data || studentsRes.value : []) || [];
+        
+        const annVal = annRes.status === 'fulfilled' ? annRes.value : {};
+        const rawAnn =
+          annVal.announcements ||
+          annVal.data?.announcements ||
+          annVal.data ||
+          (Array.isArray(annVal) ? annVal : []);
+
+        let totalAsgCount = 0;
+        if (batches.length > 0) {
+          const asgRes = await mentorService.getBatchAssignments(batches[0]._id).catch(() => ({ data: [] }));
+          totalAsgCount = (asgRes.data || []).length;
+        }
+
+        setStats({
+          totalBatches: batches.length,
+          totalStudents: students.length,
+          totalAssignments: totalAsgCount,
+          activeBatches: batches.slice(0, 3),
+        });
+
+        // Filter relevant announcements for mentors
+        const relevant = (Array.isArray(rawAnn) ? rawAnn : []).filter(
+          (a) => a.targetAudience === 'all' || a.targetAudience === 'mentors'
+        );
+        setAnnouncements(relevant.slice(0, 4));
+      } catch (err) {
+        console.error('Mentor dashboard error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMentorStats();
+  }, []);
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">
-          Mentor Dashboard
-        </h1>
-
-        <p className="mt-1 text-sm text-slate-500">
-          Manage your students, attendance, assignments, and progress.
-        </p>
-      </div>
-
-      {/* Batch Information */}
-      <div className="rounded-2xl bg-indigo-600 p-6 text-white shadow-lg">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm font-medium text-indigo-200">
-              Assigned Batch
-            </p>
-
-            <h2 className="mt-1 text-xl font-bold">
-              ASTU MSJ Summer Bootcamp 2026
-            </h2>
-
-            <p className="mt-2 text-sm text-indigo-100">
-              You are assigned as a mentor for this batch.
-            </p>
+    <div className="space-y-6 animate-fadeIn">
+      {/* Welcome Banner */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden">
+        <div className="relative z-10 max-w-xl space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold backdrop-blur-xs border border-indigo-500/30">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Mentor & Faculty Console</span>
           </div>
-
-          <div className="rounded-xl bg-white/10 p-3">
-            <Users className="h-6 w-6" />
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Welcome, {user?.fullName || 'Mentor'}!
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Manage your cohort batches, review student project submissions, and track daily attendance telemetry.
+          </p>
         </div>
       </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
+      {/* Announcements & Broadcasts */}
+      {announcements.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Megaphone className="w-4 h-4 text-rose-600" />
+              <h3 className="text-sm font-bold text-slate-900">Faculty Notices & Broadcasts</h3>
+            </div>
+          </div>
 
-          return (
-            <div
-              key={stat.title}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
-                  <Icon className="h-5 w-5" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {announcements.map((ann) => (
+              <div
+                key={ann._id}
+                className={`p-4 sm:p-5 rounded-3xl border transition shadow-xs ${
+                  ann.urgent ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200/80 bg-white'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    {ann.urgent && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                        <AlertCircle className="w-3 h-3" />
+                        Urgent
+                      </span>
+                    )}
+                    <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(ann.publishDate || ann.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full capitalize">
+                    {ann.targetAudience}
+                  </span>
                 </div>
 
-                <TrendingUp className="h-4 w-4 text-emerald-500" />
-              </div>
-
-              <div className="mt-4">
-                <p className="text-sm font-medium text-slate-500">
-                  {stat.title}
-                </p>
-
-                <p className="mt-1 text-2xl font-extrabold text-slate-900">
-                  {stat.value}
-                </p>
-
-                <p className="mt-1 text-xs text-slate-400">
-                  {stat.description}
+                <h4 className="font-bold text-slate-900 text-xs mb-1">{ann.title}</h4>
+                <p className="text-xs text-slate-600 leading-relaxed line-clamp-3 whitespace-pre-line">
+                  {ann.content}
                 </p>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Batches */}
+        <Link
+          to="/mentor/batches"
+          className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all flex items-center justify-between group"
+        >
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold text-slate-400 uppercase">Assigned Cohorts</div>
+            <div className="text-2xl font-extrabold text-slate-900">{stats.totalBatches}</div>
+            <div className="text-[11px] text-indigo-600 font-semibold flex items-center gap-1">
+              <span>View Cohorts</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </div>
-          );
-        })}
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <Layers className="w-6 h-6" />
+          </div>
+        </Link>
+
+        {/* Students */}
+        <Link
+          to="/mentor/progress"
+          className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all flex items-center justify-between group"
+        >
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold text-slate-400 uppercase">Total Students</div>
+            <div className="text-2xl font-extrabold text-slate-900">{stats.totalStudents}</div>
+            <div className="text-[11px] text-blue-600 font-semibold flex items-center gap-1">
+              <span>Track Progress</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <Users className="w-6 h-6" />
+          </div>
+        </Link>
+
+        {/* Assignments & Grading */}
+        <Link
+          to="/mentor/assignments"
+          className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md hover:border-rose-300 transition-all flex items-center justify-between group"
+        >
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold text-slate-400 uppercase">Coursework</div>
+            <div className="text-2xl font-extrabold text-slate-900">{stats.totalAssignments}</div>
+            <div className="text-[11px] text-rose-600 font-semibold flex items-center gap-1">
+              <span>Grade Work</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+            <FileCode2 className="w-6 h-6" />
+          </div>
+        </Link>
+
+        {/* Attendance */}
+        <Link
+          to="/mentor/attendance"
+          className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md hover:border-emerald-300 transition-all flex items-center justify-between group"
+        >
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold text-slate-400 uppercase">Attendance</div>
+            <div className="text-2xl font-extrabold text-slate-900">Mark</div>
+            <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+              <span>Log Session</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <CalendarCheck className="w-6 h-6" />
+          </div>
+        </Link>
       </div>
 
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent Activity */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 p-5">
-            <h2 className="font-bold text-slate-900">Recent Activity</h2>
-
-            <p className="mt-1 text-xs text-slate-500">
-              Latest activity from your students
-            </p>
+      {/* Cohorts Overview List */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-slate-900">Assigned Cohort Batches</h3>
+            <p className="text-xs text-slate-500">Batches currently under your mentorship</p>
           </div>
-
-          <div className="divide-y divide-slate-100">
-            <div className="flex items-center gap-4 p-5">
-              <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600">
-                <ClipboardCheck className="h-4 w-4" />
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  Attendance recorded
-                </p>
-
-                <p className="text-xs text-slate-500">
-                  Today's attendance has been recorded.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 p-5">
-              <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600">
-                <FileText className="h-4 w-4" />
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  Assignment activity
-                </p>
-
-                <p className="text-xs text-slate-500">
-                  Students have submitted recent assignments.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 p-5">
-              <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600">
-                <Megaphone className="h-4 w-4" />
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  New announcement
-                </p>
-
-                <p className="text-xs text-slate-500">
-                  A new announcement was posted for your batch.
-                </p>
-              </div>
-            </div>
-          </div>
+          <Link
+            to="/mentor/batches"
+            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+          >
+            <span>Manage All</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
-        {/* Upcoming Schedule */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 p-5">
-            <h2 className="font-bold text-slate-900">Upcoming Schedule</h2>
-
-            <p className="mt-1 text-xs text-slate-500">
-              Your upcoming bootcamp activities
-            </p>
+        {stats.activeBatches.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-xs">
+            No batches assigned to your account yet. An administrator will assign you to an active cohort.
           </div>
-
-          <div className="p-5">
-            <div className="flex items-start gap-4 rounded-xl bg-slate-50 p-4">
-              <div className="rounded-xl bg-white p-3 text-indigo-600 shadow-sm">
-                <CalendarDays className="h-5 w-5" />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {stats.activeBatches.map((b) => (
+              <div
+                key={b._id}
+                className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between space-y-3"
+              >
+                <div className="space-y-1">
+                  <h4 className="font-bold text-slate-900 text-xs">{b.name}</h4>
+                  <p className="text-[11px] text-slate-500 line-clamp-2">{b.description || 'Bootcamp cohort'}</p>
+                </div>
+                <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-200/60">
+                  <span className="text-slate-500">
+                    {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
+                  </span>
+                  <span className="font-bold text-emerald-600">Active</span>
+                </div>
               </div>
-
-              <div>
-                <p className="text-sm font-bold text-slate-800">
-                  Web Development Session
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Tomorrow · 9:00 AM
-                </p>
-
-                <p className="mt-2 text-xs font-medium text-indigo-600">
-                  ASTU MSJ Bootcamp
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
