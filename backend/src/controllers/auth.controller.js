@@ -29,6 +29,7 @@ const register = asyncHandler(async (req, res, next) => {
 // ======================================================
 
 const login = asyncHandler(async (req, res, next) => {
+<<<<<<< HEAD
   const identifier = (req.body.userId || req.body.uniqueId || req.body.identifier || req.body.email || '').trim();
   const { password, role } = req.body;
 
@@ -47,6 +48,23 @@ const login = asyncHandler(async (req, res, next) => {
 
   if (!user || !(await user.comparePassword(password))) {
     return next(new AppError('Incorrect credentials or password.', 401));
+=======
+  const { email, userId, password } = req.body;
+  const identifier = email || userId;
+
+  if (!identifier || !password) {
+    return next(
+      new AppError("Please provide email/userId and password.", 400)
+    );
+  }
+
+  const user = await User.findOne({
+    $or: [{ email: identifier }, { userId: identifier }]
+  }).select("+password");
+
+  if (!user || !(await user.comparePassword(password))) {
+    return next(new AppError("Incorrect credentials.", 401));
+>>>>>>> f23b272061739ad39957c55b321398292205d88d
   }
 
   if (role && user.role.toLowerCase() !== role.toLowerCase()) {
