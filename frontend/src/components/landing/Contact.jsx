@@ -161,7 +161,6 @@ export default function Contact({ onShowToast }) {
                   </div>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                     Adama Science & Technology University <br />
-                    Faculty of Computing, Block C — Room 204 <br />
                     Adama, Ethiopia
                   </p>
                 </div>

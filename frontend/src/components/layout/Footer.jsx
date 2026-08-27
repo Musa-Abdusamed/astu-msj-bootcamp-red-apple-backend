@@ -18,7 +18,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <div className="text-xs text-slate-400">
-            © 2026 ASTU Microsoft Student Group. All rights reserved.
+            © 2026 Adama Science and Technology University Muslim Students Jemea (ASTU MSJ). All rights reserved.
           </div>
 
         </div>

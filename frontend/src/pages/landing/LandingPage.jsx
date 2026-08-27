@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Hero from '../../components/landing/Hero';
 import About from '../../components/landing/About';
@@ -8,13 +9,11 @@ import FAQ from '../../components/landing/FAQ';
 import Contact from '../../components/landing/Contact';
 import Footer from '../../components/layout/Footer';
 import AuthModal from '../../components/common/AuthModal';
-import ApplyModal from '../../components/common/ApplyModal';
 import Toast from '../../components/common/Toast';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [applyModalOpen, setApplyModalOpen] = useState(false);
-  const [selectedTrack, setSelectedTrack] = useState('Frontend Track');
   const [toastMessage, setToastMessage] = useState(null);
 
   const showToast = (message) => {
@@ -25,8 +24,7 @@ export default function LandingPage() {
   };
 
   const handleOpenApplyForTrack = (trackTitle) => {
-    setSelectedTrack(trackTitle);
-    setApplyModalOpen(true);
+    navigate('/apply', { state: { track: trackTitle } });
   };
 
   return (
@@ -38,12 +36,12 @@ export default function LandingPage() {
       {/* Navigation */}
       <Navbar
         onOpenLogin={() => setAuthModalOpen(true)}
-        onOpenApply={() => setApplyModalOpen(true)}
+        onOpenApply={() => navigate('/apply')}
       />
 
       {/* Main Content Sections */}
       <main className="flex-grow">
-        <Hero onOpenApply={() => setApplyModalOpen(true)} />
+        <Hero onOpenApply={() => navigate('/apply')} />
         <About />
         <Tracks onSelectTrack={handleOpenApplyForTrack} />
         <Mentors />
@@ -60,14 +58,6 @@ export default function LandingPage() {
         onClose={() => setAuthModalOpen(false)}
         onShowToast={showToast}
       />
-
-      <ApplyModal
-        isOpen={applyModalOpen}
-        onClose={() => setApplyModalOpen(false)}
-        initialTrack={selectedTrack}
-        onShowToast={showToast}
-      />
-
     </div>
   );
 }

@@ -48,28 +48,45 @@ export default function AdminApplications() {
   };
 
   const handleStatusChange = async (id, newStatus) => {
-    await adminService.updateApplicationStatus(id, newStatus);
-    showToast(`Application marked as ${newStatus}`);
-    fetchApps();
-    if (selectedApp?._id === id) {
-      setSelectedApp({ ...selectedApp, status: newStatus });
+    try {
+      if (newStatus.toLowerCase() === 'rejected' || newStatus.toLowerCase() === 'reject') {
+        await adminService.rejectApplication(id);
+      } else {
+        await adminService.acceptApplication(id);
+      }
+      showToast(`Application marked as ${newStatus}`);
+      fetchApps();
+      if (selectedApp?._id === id) {
+        setSelectedApp({ ...selectedApp, status: newStatus });
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+      showToast(err.response?.data?.message || `Failed to update status.`);
     }
   };
 
   const handleEnrollAccepted = async () => {
     if (!selectedApp) return;
-    // Create new student user from application
-    await adminService.createUser({
-      fullName: selectedApp.fullName,
-      email: selectedApp.email,
-      role: 'student',
-      phone: selectedApp.phone,
-      batchId: enrollBatchId,
-    });
-    await adminService.updateApplicationStatus(selectedApp._id, 'Accepted');
-    showToast(`Enrolled ${selectedApp.fullName} into cohort and created student account!`);
-    setSelectedApp(null);
-    fetchApps();
+    try {
+      // The backend accept endpoint creates the student account and sends them their login email
+      const res = await adminService.acceptApplication(selectedApp._id);
+      
+      const createdUserId = res?.data?.user?.id || res?.data?.user?._id;
+      if (enrollBatchId && createdUserId) {
+        try {
+          await adminService.enrollStudentToBatch(enrollBatchId, createdUserId);
+        } catch (batchErr) {
+          console.warn('Batch enrollment note:', batchErr);
+        }
+      }
+
+      showToast(`Accepted ${selectedApp.fullName}! Account created and acceptance email sent.`);
+      setSelectedApp(null);
+      fetchApps();
+    } catch (err) {
+      console.error('Enroll/Accept error:', err);
+      showToast(err.response?.data?.message || 'Failed to approve application.');
+    }
   };
 
   const filtered = applications.filter((app) => {

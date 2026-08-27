@@ -5,27 +5,68 @@ export const adminService = {
   // 1. STATS & ANALYTICS
   // ==========================================
   getStats: async () => {
-    const res = await api.get('/admin/stats');
-    return res.data;
+    try {
+      const res = await api.get('/admin/stats');
+      return res.data;
+    } catch {
+      const [usersRes, batchesRes, appsRes, subsRes] = await Promise.allSettled([
+        api.get('/users'),
+        api.get('/batches'),
+        api.get('/applications'),
+        api.get('/submissions'),
+      ]);
+      const users = (usersRes.status === 'fulfilled' ? usersRes.value.data?.data : []) || [];
+      const batches = (batchesRes.status === 'fulfilled' ? batchesRes.value.data?.data : []) || [];
+      const applications = (appsRes.status === 'fulfilled' ? appsRes.value.data?.data : []) || [];
+      const submissions = (subsRes.status === 'fulfilled' ? subsRes.value.data?.data : []) || [];
+
+      return {
+        data: {
+          totalStudents: users.filter((u) => u.role === 'student').length,
+          totalMentors: users.filter((u) => u.role === 'mentor').length,
+          activeBatches: batches.filter((b) => b.isActive !== false).length,
+          pendingApplications: applications.filter((a) => a.status === 'Pending').length,
+          totalSubmissions: submissions.length,
+        },
+      };
+    }
   },
 
   // ==========================================
   // 2. APPLICATIONS & ADMISSIONS
   // ==========================================
+  submitApplication: async (data) => {
+    const res = await api.post('/applications', data);
+    return res.data;
+  },
+
+  getApplicationStatus: async () => {
+    const res = await api.get('/applications/status');
+    return res.data;
+  },
+
   getApplications: async () => {
     const res = await api.get('/applications');
     return res.data;
   },
 
+  acceptApplication: async (id) => {
+    const res = await api.patch(`/applications/${id}/accept`);
+    return res.data;
+  },
+
+  rejectApplication: async (id) => {
+    const res = await api.patch(`/applications/${id}/reject`);
+    return res.data;
+  },
+
   updateApplicationStatus: async (id, status) => {
-    if (status.toLowerCase() === 'approved' || status.toLowerCase() === 'approve') {
-      const res = await api.patch(`/applications/${id}/approve`);
-      return res.data;
-    } else if (status.toLowerCase() === 'rejected' || status.toLowerCase() === 'reject') {
+    const s = (status || '').toLowerCase();
+    if (s === 'rejected' || s === 'reject') {
       const res = await api.patch(`/applications/${id}/reject`);
       return res.data;
     } else {
-      const res = await api.patch(`/applications/${id}`, { status });
+      const res = await api.patch(`/applications/${id}/accept`);
       return res.data;
     }
   },
@@ -79,20 +120,23 @@ export const adminService = {
   // ==========================================
   // 5. ATTENDANCE OVERSIGHT
   // ==========================================
+  getBatchAttendance: async (batchId, date) => {
+    const res = await api.get(`/attendances/batch/${batchId}`, { params: { date } });
+    return res.data;
+  },
+
   getAttendanceRecords: async (batchId, date) => {
-    const res = await api.get('/attendance', { params: { batchId, date } });
+    const res = await api.get(`/attendances/batch/${batchId}`, { params: { date } });
     return res.data;
   },
 
   markAttendance: async (data) => {
-    const res = await api.post('/attendance', data);
+    const res = await api.post('/attendances', data);
     return res.data;
   },
 
   markBulkAttendance: async (batchId, date, status = 'present') => {
-    // Note: If bulk attendance API does not exist, this will fail. 
-    // It is up to the backend to implement this endpoint.
-    const res = await api.post('/attendance/bulk', { batchId, date, status });
+    const res = await api.post('/attendances', { batchId, date, status });
     return res.data;
   },
 

@@ -61,6 +61,8 @@ export default function StudentDashboard() {
             ? Math.round(scoredItems.reduce((a, b) => a + b.score, 0) / scoredItems.length)
             : 0;
 
+        const attendanceData = percentRes.status === 'fulfilled' ? percentRes.value.data || percentRes.value : {};
+
         setStats({
           attendancePercentage: attendanceData.percentage || 0,
           totalAssignments: (Array.isArray(assigns) ? assigns : []).length,

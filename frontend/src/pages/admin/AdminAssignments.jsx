@@ -106,7 +106,8 @@ export default function AdminAssignments() {
     if (!gradingSub) return;
 
     await adminService.gradeSubmission(gradingSub._id, gradeForm);
-    showToast(`Graded submission for ${gradingSub.studentName}!`);
+    const sName = gradingSub.studentId?.fullName || gradingSub.studentName || 'Student';
+    showToast(`Graded submission for ${sName}!`);
     setGradingSub(null);
     fetchSubmissions();
   };
@@ -236,8 +237,12 @@ export default function AdminAssignments() {
                       submissions.map((sub) => (
                         <tr key={sub._id} className="hover:bg-slate-50/60 transition">
                           <td className="px-4 py-3.5">
-                            <div className="font-bold text-slate-900">{sub.studentName}</div>
-                            <div className="text-[10px] text-slate-400">{sub.studentEmail}</div>
+                            <div className="font-bold text-slate-900">
+                              {sub.studentId?.fullName || sub.studentName || 'Student'}
+                            </div>
+                            <div className="text-[10px] text-slate-400">
+                              {sub.studentId?.email || sub.studentEmail || (sub.studentId?.userId ? `ID: ${sub.studentId.userId}` : '—')}
+                            </div>
                           </td>
                           <td className="px-4 py-3.5">
                             <div className="flex items-center gap-2">
@@ -425,7 +430,10 @@ export default function AdminAssignments() {
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900">Grade Student Deliverable</h3>
-                <p className="text-slate-500">{gradingSub.studentName} • {selectedAssignment?.title}</p>
+                <p className="text-slate-500">
+                  {gradingSub.studentId?.fullName || gradingSub.studentName || 'Student'}
+                  {gradingSub.studentId?.userId ? ` (${gradingSub.studentId.userId})` : ''} • {selectedAssignment?.title}
+                </p>
               </div>
             </div>
 

@@ -42,12 +42,22 @@ export default function AdminCurriculum() {
   });
 
   const fetchData = async () => {
-    const [schRes, resRes] = await Promise.all([
-      adminService.getCurriculumSchedules(),
-      adminService.getResources(),
-    ]);
-    setSchedules(schRes.data?.schedules || []);
-    setResources(resRes.data?.resources || []);
+    try {
+      const [schRes, resRes] = await Promise.allSettled([
+        adminService.getCurriculumSchedules(),
+        adminService.getResources(),
+      ]);
+      const schVal = schRes.status === 'fulfilled' ? schRes.value : {};
+      const resVal = resRes.status === 'fulfilled' ? resRes.value : {};
+      const schList = schVal.data?.schedules || schVal.schedules || schVal.data || (Array.isArray(schVal) ? schVal : []);
+      const resList = resVal.data?.resources || resVal.resources || resVal.data || (Array.isArray(resVal) ? resVal : []);
+      setSchedules(Array.isArray(schList) ? schList : []);
+      setResources(Array.isArray(resList) ? resList : []);
+    } catch (err) {
+      console.error('Failed to load curriculum data:', err);
+      setSchedules([]);
+      setResources([]);
+    }
   };
 
   useEffect(() => {

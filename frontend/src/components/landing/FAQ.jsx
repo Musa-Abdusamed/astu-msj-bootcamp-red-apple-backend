@@ -8,12 +8,17 @@ export default function FAQ() {
     {
       question: 'What are the admissions criteria?',
       answer:
-        'Admissions are open to passionate ASTU students and tech enthusiasts. We evaluate basic programming aptitude, problem-solving mindset, and your commitment to completing the intensive 3-week program and capstone project.',
+        'Admissions are open to motivated university students and aspiring tech builders. We evaluate basic programming aptitude, problem-solving mindset, and your commitment to completing the intensive 3-month (12-week) program and capstone project.',
+    },
+    {
+      question: 'How does the 1:5 mentorship model work?',
+      answer:
+        'Every student is assigned to a dedicated mentor cohort where 1 experienced faculty mentor oversees a group of 5 students. This ensures personalized weekly code reviews, 1-on-1 milestone evaluations, and direct technical mentorship throughout the 3 months.',
     },
     {
       question: 'How much time do I need to commit each week?',
       answer:
-        'The bootcamp is an intensive full-time summer program. You should expect to commit approximately 25-30 hours per week across live mentor sessions, guided workshops, and project development.',
+        'The bootcamp is an intensive summer program. You should expect to commit approximately 20-25 hours per week across live mentor sessions, structured 5-day weekly syllabus labs, and hands-on project deliverables.',
     },
     {
       question: 'Are there any prerequisites?',
@@ -28,7 +33,7 @@ export default function FAQ() {
     {
       question: 'Is there a cost to attend?',
       answer:
-        'No! The ASTU MSJ Summer Bootcamp is completely free for accepted students, supported by the Microsoft Student Group at Adama Science & Technology University.',
+        'No! The ASTU MSJ Summer Bootcamp is completely free for accepted students, organized and supported by the Adama Science and Technology University Muslim Students Jemea (ASTU MSJ).',
     },
   ];
 
@@ -46,10 +51,10 @@ export default function FAQ() {
             FAQ
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            Common questions
+            Frequently Asked Questions
           </h2>
           <p className="text-base text-slate-600">
-            Still unsure? Reach out via the contact form below.
+            Everything you need to know about the 3-month ASTU MSJ Bootcamp.
           </p>
         </div>
 
@@ -64,7 +69,7 @@ export default function FAQ() {
               >
                 <button
                   onClick={() => toggleAccordion(index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 focus:outline-none"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 focus:outline-none cursor-pointer"
                   aria-expanded={isOpen}
                 >
                   <span className="text-[15px] font-bold text-slate-900">

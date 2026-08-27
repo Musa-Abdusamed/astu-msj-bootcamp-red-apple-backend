@@ -11,11 +11,14 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(false);
 
-  const login = async (email, password, role = 'student') => {
+  const login = async (userId, password, role = 'student') => {
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { email, password, role });
-      const userData = response.data?.data?.user || response.data?.user;
+      const response = await api.post('/auth/login', { userId, password, role });
+      const rawUser = response.data?.data?.user || response.data?.user;
+      const mustChangeCredentials =
+        response.data?.mustChangeCredentials ?? rawUser?.mustChangeCredentials ?? false;
+      const userData = { ...rawUser, mustChangeCredentials };
       const userToken = response.data?.token;
 
       setUser(userData);
@@ -23,18 +26,30 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', userToken);
       setLoading(false);
-      return { success: true, user: userData };
+      return { success: true, user: userData, mustChangeCredentials };
     } catch (error) {
       setLoading(false);
       return { success: false, error: error.response?.data?.message || error.message };
     }
   };
 
+  const updateUser = (updatedFields) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...updatedFields };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const register = async (fullName, email, password, role = 'student') => {
     setLoading(true);
     try {
       const response = await api.post('/auth/register', { fullName, email, password, role });
-      const userData = response.data?.data?.user || response.data?.user;
+      const rawUser = response.data?.data?.user || response.data?.user;
+      const mustChangeCredentials =
+        response.data?.mustChangeCredentials ?? rawUser?.mustChangeCredentials ?? true;
+      const userData = { ...rawUser, mustChangeCredentials };
       const userToken = response.data?.token;
 
       setUser(userData);
@@ -42,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', userToken);
       setLoading(false);
-      return { success: true, user: userData };
+      return { success: true, user: userData, mustChangeCredentials };
     } catch (error) {
       setLoading(false);
       return { success: false, error: error.response?.data?.message || error.message };
@@ -57,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, role: user?.role, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, role: user?.role, loading, login, register, updateUser, logout }}>
       {children}
     </AuthContext.Provider>
   );
