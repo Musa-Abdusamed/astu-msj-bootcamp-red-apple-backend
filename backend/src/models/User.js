@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: [8, "Password must be at least 6 characters"],
+      minlength: [8, "Password must be at least 8 characters"],
       select: false,
     },
 
@@ -77,11 +77,29 @@ const userSchema = new mongoose.Schema(
     },
 
     passwordChangedAt: Date,
+
+    // ==========================================
+    // PASSWORD RESET
+    // ==========================================
+
+    passwordResetOTP: {
+      type: String,
+      select: false,
+    },
+
+    passwordResetOTPExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// ==========================================
+// HASH PASSWORD
+// ==========================================
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
@@ -89,10 +107,17 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 12);
 });
 
+// ==========================================
+// COMPARE PASSWORD
+// ==========================================
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// ==========================================
+// CHECK PASSWORD CHANGE AFTER JWT
+// ==========================================
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (!this.passwordChangedAt) {
