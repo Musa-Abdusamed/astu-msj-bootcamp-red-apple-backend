@@ -59,18 +59,33 @@ export default function UserManagement() {
     e.preventDefault();
     if (!formData.fullName || !formData.email) return;
 
-    await adminService.createUser(formData);
-    showToast(`User ${formData.fullName} created successfully!`);
-    setIsAddModalOpen(false);
-    setFormData({
-      fullName: '',
-      email: '',
-      password: '',
-      role: 'student',
-      phone: '',
-      batchId: '',
-    });
-    fetchUsers();
+    // Auto-generate an 8-character temporary password
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#";
+    let generatedPassword = "";
+    for (let i = 0; i < 8; i++) {
+      generatedPassword += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+
+    try {
+      const payload = { ...formData, password: generatedPassword };
+      await adminService.createUser(payload);
+      
+      showToast(`User ${formData.fullName} created successfully and welcome email sent!`);
+      
+      setIsAddModalOpen(false);
+      setFormData({
+        fullName: '',
+        email: '',
+        password: '',
+        role: 'student',
+        phone: '',
+        batchId: '',
+      });
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      showToast(err.response?.data?.message || 'Failed to create user. Please try again.');
+    }
   };
 
   const handleUpdateUser = async (e) => {
@@ -305,29 +320,16 @@ export default function UserManagement() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="user@astu.edu.et"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 text-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Temporary Password</label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 text-slate-900"
-                  />
-                </div>
+              <div className="mb-3">
+                <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="user@astu.edu.et"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 text-slate-900"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
