@@ -1,8 +1,9 @@
 const User = require("../models/User");
 const generateCustomId = require('../utils/generateCustomId');
+const sendEmail = require('../utils/sendEmail');
 
 exports.createUser = async (req, res) => {
-    const { fullName, email, password, role, phone, userId } = req.body; 
+    const { fullName, email, password, role, phone, userId, batchId } = req.body; 
     
     try {
         const existingUser = await User.findOne({ email });
@@ -18,8 +19,47 @@ exports.createUser = async (req, res) => {
             password,
             role,
             phone,
+            batchId: batchId || null,
             mustChangeCredentials: true 
         });
+
+        // Send email with credentials
+        try {
+            await sendEmail({
+                to: newUser.email,
+                subject: "ASTU MSJ Bootcamp - Account Created",
+                text: `
+Dear ${newUser.fullName},
+
+Your account for the ASTU MSJ Bootcamp has been created by an administrator.
+
+--------------------------------
+ACCOUNT INFORMATION
+--------------------------------
+
+Custom ID: ${newUser.userId}
+Email: ${newUser.email}
+Temporary Password: ${password}
+Role: ${newUser.role}
+
+--------------------------------
+
+Please log in using the information above.
+
+For security reasons, you must change your password after your first login.
+
+Do not share your login credentials with anyone.
+
+Welcome to the ASTU MSJ Bootcamp!
+
+ASTU MSJ Bootcamp Team
+`
+            });
+        } catch (emailError) {
+            console.error("Failed to send welcome email:", emailError);
+            // We can choose to delete the user or just continue since the admin also sees the password on their screen
+            // For now, we continue but log the error
+        }
         
         return res.status(201).json({
             success: true,

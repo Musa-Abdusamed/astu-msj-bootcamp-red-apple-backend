@@ -140,6 +140,13 @@ export default function MentorAttendance() {
 
   const handleSaveAttendance = async () => {
     if (students.length === 0) return;
+    
+    const isAlreadySet = students.some((st) => attendanceMap[st._id]?.recordId);
+    if (isAlreadySet) {
+      showToast('Attendance already set for this date.');
+      return;
+    }
+
     setIsSaving(true);
 
     try {
