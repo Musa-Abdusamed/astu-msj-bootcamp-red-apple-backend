@@ -63,16 +63,43 @@ const getConversation = asyncHandler(async (req, res, next) => {
 
 
 const getInbox = asyncHandler(async (req, res, next) => {
+    // Find all messages involving the user (sent or received)
     const messages = await Message.find({
-        recipient: req.user.id
+        $or: [{ sender: req.user.id }, { recipient: req.user.id }]
     })
-        .populate('sender', 'fullName email')
+        .populate('sender', 'fullName email role avatar')
+        .populate('recipient', 'fullName email role avatar')
         .sort({ createdAt: -1 });
+
+    // Group by conversation partner
+    const conversationsMap = new Map();
+
+    for (const msg of messages) {
+        const isSender = msg.sender._id.toString() === req.user.id.toString();
+        const otherUser = isSender ? msg.recipient : msg.sender;
+        const otherUserIdStr = otherUser._id.toString();
+
+        if (!conversationsMap.has(otherUserIdStr)) {
+            conversationsMap.set(otherUserIdStr, {
+                otherUser,
+                latestMessage: msg,
+                unreadCount: (!isSender && !msg.read) ? 1 : 0
+            });
+        } else {
+            // Since we sorted by createdAt: -1, the first one we saw was the latest.
+            // We just need to tally unread count for messages sent TO the user.
+            if (!isSender && !msg.read) {
+                conversationsMap.get(otherUserIdStr).unreadCount += 1;
+            }
+        }
+    }
+
+    const conversations = Array.from(conversationsMap.values());
 
     res.status(200).json({
         success: true,
-        count: messages.length,
-        messages
+        count: conversations.length,
+        conversations
     });
 });
 
