@@ -200,7 +200,7 @@ export default function Settings() {
             {avatarPreview ? (
               <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
             ) : user?.avatar && user.avatar !== 'default-avatar.png' ? (
-              <img src={`${SERVER_URL}/uploads/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+              <img src={user.avatar.startsWith('http') ? user.avatar : `${SERVER_URL}/uploads/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               <UserCheck className="w-8 h-8 text-slate-400" />
             )}
