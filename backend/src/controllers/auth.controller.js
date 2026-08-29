@@ -151,7 +151,7 @@ const updateProfilePicture = asyncHandler(async (req, res, next) => {
     return next(new AppError("User not found.", 404));
   }
 
-  user.avatar = req.file.filename;
+  user.avatar = req.file.path;
 
   await user.save();
 
@@ -159,7 +159,7 @@ const updateProfilePicture = asyncHandler(async (req, res, next) => {
     status: "success",
     message: "Profile picture updated successfully.",
     data: {
-      avatar: user.avatar,
+      user: user
     },
   });
 });
