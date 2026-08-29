@@ -63,9 +63,7 @@ export default function Sidebar() {
       <div>
         {/* Brand */}
         <div className="flex items-center gap-3 px-3 py-4 mb-4 border-b border-slate-800">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center font-mono font-extrabold text-sm text-white shadow-md shadow-indigo-500/20">
-            &gt;_
-          </div>
+          <img src="/logo.png" alt="ASTU MSJ Logo" className="w-10 h-10 rounded-full object-contain shadow-md shadow-indigo-500/20" />
           <div>
             <div className="text-sm font-bold text-white flex items-center gap-1.5">
               <span>ASTU MSJ</span>

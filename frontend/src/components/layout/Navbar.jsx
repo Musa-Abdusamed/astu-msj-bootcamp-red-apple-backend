@@ -35,9 +35,7 @@ export default function Navbar({ onOpenLogin, onOpenApply }) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <a href="#home" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
-              <span className="font-mono font-bold text-sm tracking-tight">&gt;_</span>
-            </div>
+            <img src="/logo.png" alt="ASTU MSJ Logo" className="w-10 h-10 rounded-full object-contain group-hover:scale-105 transition-transform shadow-md" />
             <div className="flex items-center gap-1.5 text-lg font-bold tracking-tight">
               <span className="text-slate-900 font-extrabold">ASTU MSJ</span>
               <span className="text-indigo-600 font-bold">Bootcamp</span>

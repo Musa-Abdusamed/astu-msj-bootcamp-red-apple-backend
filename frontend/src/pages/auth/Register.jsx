@@ -29,8 +29,8 @@ export default function Register() {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <Link to="/" className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 mb-2">
-            <Shield className="w-6 h-6" />
+          <Link to="/" className="inline-flex items-center justify-center mb-2">
+            <img src="/logo.png" alt="ASTU MSJ Logo" className="w-16 h-16 rounded-full object-contain shadow-md" />
           </Link>
           <h2 className="text-2xl font-extrabold text-slate-900">
             Create Account
