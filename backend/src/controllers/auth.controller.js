@@ -151,7 +151,7 @@ const updateProfilePicture = asyncHandler(async (req, res, next) => {
     return next(new AppError("User not found.", 404));
   }
 
-  user.avatar = req.file.filename;
+  user.avatar = req.file.path;
 
   await user.save({ validateModifiedOnly: true });
 
