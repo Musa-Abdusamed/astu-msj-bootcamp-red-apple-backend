@@ -21,6 +21,7 @@ export default function AdminCurriculum() {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [resourceToDelete, setResourceToDelete] = useState(null);
 
   // Schedule form state
   const [scheduleForm, setScheduleForm] = useState({
@@ -111,11 +112,16 @@ export default function AdminCurriculum() {
     fetchData();
   };
 
-  const handleDeleteResource = async (id) => {
-    if (window.confirm('Remove this resource?')) {
+  const confirmDeleteResource = async (id) => {
+    try {
       await adminService.deleteResource(id);
       showToast('Resource removed.');
       fetchData();
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to remove resource.');
+    } finally {
+      setResourceToDelete(null);
     }
   };
 
@@ -241,7 +247,7 @@ export default function AdminCurriculum() {
                     {res.topic}
                   </span>
                   <button
-                    onClick={() => handleDeleteResource(res._id)}
+                    onClick={() => setResourceToDelete(res._id)}
                     className="p-1 text-slate-400 hover:text-rose-600 transition cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -442,6 +448,25 @@ export default function AdminCurriculum() {
                 <span>Save Resource</span>
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {resourceToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6 text-rose-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Remove Resource?</h3>
+              <p className="text-xs text-slate-500 mt-1">This will permanently delete the resource from the curriculum.</p>
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <button onClick={() => setResourceToDelete(null)} className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs transition cursor-pointer">Cancel</button>
+              <button onClick={() => confirmDeleteResource(resourceToDelete)} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-sm transition cursor-pointer">Remove Resource</button>
+            </div>
           </div>
         </div>
       )}

@@ -36,6 +36,7 @@ export default function MentorProgress() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -166,8 +167,7 @@ export default function MentorProgress() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this progress record?')) return;
+  const confirmDelete = async (id) => {
     try {
       await mentorService.deleteProgress(id);
       showToast('Progress record deleted.');
@@ -175,6 +175,8 @@ export default function MentorProgress() {
     } catch (err) {
       console.error('Delete progress error:', err);
       showToast('Failed to delete record.');
+    } finally {
+      setItemToDelete(null);
     }
   };
 
@@ -331,7 +333,7 @@ export default function MentorProgress() {
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(item._id)}
+                        onClick={() => setItemToDelete(item._id)}
                         className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                         title="Delete milestone"
                       >
@@ -471,6 +473,25 @@ export default function MentorProgress() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {itemToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto">
+              <AlertCircle className="w-6 h-6 text-rose-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Delete Progress Record?</h3>
+              <p className="text-xs text-slate-500 mt-1">This action cannot be undone. Are you sure you want to permanently delete this milestone?</p>
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <button onClick={() => setItemToDelete(null)} className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs transition cursor-pointer">Cancel</button>
+              <button onClick={() => confirmDelete(itemToDelete)} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-sm transition cursor-pointer">Delete Record</button>
+            </div>
           </div>
         </div>
       )}

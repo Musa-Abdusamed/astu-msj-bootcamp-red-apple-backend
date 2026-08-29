@@ -29,6 +29,7 @@ export default function MentorResources() {
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [toast, setToast] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resourceToDelete, setResourceToDelete] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -108,16 +109,16 @@ export default function MentorResources() {
     }
   };
 
-  const handleDeleteResource = async (id) => {
-    if (window.confirm('Are you sure you want to remove this resource?')) {
-      try {
-        await mentorService.deleteResource(id);
-        showToast('Resource removed.');
-        fetchData();
-      } catch (err) {
-        console.error('Failed to delete resource:', err);
-        showToast(err.response?.data?.message || 'Failed to delete resource.');
-      }
+  const confirmDeleteResource = async (id) => {
+    try {
+      await mentorService.deleteResource(id);
+      showToast('Resource removed.');
+      fetchData();
+    } catch (err) {
+      console.error('Failed to delete resource:', err);
+      showToast(err.response?.data?.message || 'Failed to delete resource.');
+    } finally {
+      setResourceToDelete(null);
     }
   };
 
@@ -340,7 +341,7 @@ export default function MentorResources() {
                         </span>
                         {isOwner && (
                           <button
-                            onClick={() => handleDeleteResource(resource._id)}
+                            onClick={() => setResourceToDelete(resource._id)}
                             className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                             title="Delete Resource"
                           >
@@ -463,6 +464,25 @@ export default function MentorResources() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {resourceToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6 text-rose-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Remove Resource?</h3>
+              <p className="text-xs text-slate-500 mt-1">This will permanently remove the learning resource for all students.</p>
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <button onClick={() => setResourceToDelete(null)} className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs transition cursor-pointer">Cancel</button>
+              <button onClick={() => confirmDeleteResource(resourceToDelete)} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-sm transition cursor-pointer">Remove</button>
+            </div>
           </div>
         </div>
       )}
