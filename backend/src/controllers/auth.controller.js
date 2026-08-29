@@ -37,25 +37,29 @@ const register = asyncHandler(async (req, res, next) => {
 // LOGIN
 // ======================================================
 
+// ======================================================
+// LOGIN
+// ======================================================
+
 const login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, userId, password, role } = req.body;
+  const identifier = (email || userId || '').trim();
 
   if (!identifier || !password) {
-    return next(new AppError('Please provide your Unique ID or email and password.', 400));
+    return next(new AppError("Please provide your email or Unique ID and password.", 400));
   }
 
-  // Find user by Unique ID or Email
   const escapedIdentifier = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const user = await User.findOne({
     $or: [
       { userId: { $regex: new RegExp(`^${escapedIdentifier}$`, 'i') } },
       { email: identifier.toLowerCase() },
-    ],
+    ]
   }).select("+password");
 
   if (!user || !(await user.comparePassword(password))) {
-    return next(new AppError('Incorrect credentials or password.', 401));
-  } // <-- This bracket was the one missing!
+    return next(new AppError("Incorrect credentials.", 401));
+  }
 
   if (role && user.role.toLowerCase() !== role.toLowerCase()) {
     return next(
@@ -67,26 +71,7 @@ const login = asyncHandler(async (req, res, next) => {
   }
 
   if (user.isActive === false) {
-    return next(new AppError('This account has been deactivated. Contact an admin.', 403));
-  if (!email || !password) {
-    return next(
-      new AppError("Please provide email and password.", 400)
-    );
-  }
-
-  const user = await User.findOne({ email }).select("+password");
-
-  if (!user || !(await user.comparePassword(password))) {
-    return next(new AppError("Incorrect email or password.", 401));
-  }
-
-  if (!user.isActive) {
-    return next(
-      new AppError(
-        "This account has been deactivated. Contact an admin.",
-        403
-      )
-    );
+    return next(new AppError("This account has been deactivated. Contact an admin.", 403));
   }
 
   createSendToken(user, 200, res);

@@ -208,37 +208,6 @@ const getBatchAttendance = asyncHandler(async (req, res, next) => {
   });
 });
 
-const getAttendancePercentage = asyncHandler(async (req, res, next) => {
-  const { studentId } = req.params;
-
-  await checkStudentAccess(req, studentId);
-
-  const attendance = await Attendance.find({ studentId });
-  const totalSessions = attendance.length;
-
-  if (totalSessions === 0) {
-    return res.status(200).json({
-      status: "success",
-      data: {
-        percentage: 0,
-        presentSessions: 0,
-        totalSessions: 0,
-      },
-    });
-  }
-
-  const presentSessions = attendance.filter((r) => r.status === "present").length;
-  const percentage = (presentSessions / totalSessions) * 100;
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      percentage: Number(percentage.toFixed(2)),
-      presentSessions,
-      totalSessions,
-    },
-  });
-});
 // ======================================================
 // GET ATTENDANCE PERCENTAGE
 // ======================================================
