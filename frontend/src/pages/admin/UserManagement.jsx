@@ -26,6 +26,7 @@ export default function UserManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [toast, setToast] = useState(null);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -105,11 +106,16 @@ export default function UserManagement() {
     fetchUsers();
   };
 
-  const handleDeleteUser = async (id) => {
-    if (window.confirm('Are you sure you want to remove this user?')) {
+  const confirmDeleteUser = async (id) => {
+    try {
       await adminService.deleteUser(id);
       showToast('User removed successfully.');
       fetchUsers();
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to remove user.');
+    } finally {
+      setUserToDelete(null);
     }
   };
 
@@ -270,7 +276,7 @@ export default function UserManagement() {
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDeleteUser(user._id)}
+                          onClick={() => setUserToDelete(user._id)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                           title="Delete User"
                         >
@@ -458,6 +464,25 @@ export default function UserManagement() {
                 <span>Save Changes</span>
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6 text-rose-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Remove User?</h3>
+              <p className="text-xs text-slate-500 mt-1">This will permanently delete the user's account and all associated data.</p>
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <button onClick={() => setUserToDelete(null)} className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs transition cursor-pointer">Cancel</button>
+              <button onClick={() => confirmDeleteUser(userToDelete)} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-sm transition cursor-pointer">Remove User</button>
+            </div>
           </div>
         </div>
       )}
