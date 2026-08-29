@@ -3,11 +3,14 @@ const User = require('../models/User');
 
 exports.createBatch = async (req, res) => {
     try {
-        const { name, description, startDate, endDate, isActive } = req.body;
-        const creatorId = req.user ? req.user._id : "64f1a2b3c4d5e6f7a8b9c0d1"; 
+        const { name, track, description, startDate, endDate, isActive } = req.body;
+        
+        // Safely grab the user ID whether it's stored as .id or ._id
+        const creatorId = req.user?.id || req.user?._id || "64f1a2b3c4d5e6f7a8b9c0d1"; 
 
         const newBatch = await Batch.create({ 
             name, 
+            track,
             description,
             startDate, 
             endDate, 
@@ -17,6 +20,13 @@ exports.createBatch = async (req, res) => {
         return res.status(201).json({ success: true, message: "Batch created", data: newBatch });
     } catch (err) {
         console.error(err);
+        
+        // This will send the exact Mongoose error (e.g., "Creator is required") to your React alert
+        if (err.name === 'ValidationError') {
+            const messages = Object.values(err.errors).map(val => val.message);
+            return res.status(400).json({ success: false, message: messages.join(', ') });
+        }
+        
         return res.status(500).json({ success: false, message: "Server Error" });
     }
 };

@@ -47,22 +47,7 @@ const login = asyncHandler(async (req, res, next) => {
 
   if (!user || !(await user.comparePassword(password))) {
     return next(new AppError('Incorrect credentials or password.', 401));
-  const { email, userId, password } = req.body;
-  const identifier = email || userId;
-
-  if (!identifier || !password) {
-    return next(
-      new AppError("Please provide email/userId and password.", 400)
-    );
-  }
-
-  const user = await User.findOne({
-    $or: [{ email: identifier }, { userId: identifier }]
-  }).select("+password");
-
-  if (!user || !(await user.comparePassword(password))) {
-    return next(new AppError("Incorrect credentials.", 401));
-  }
+  } // <-- This bracket was the one missing!
 
   if (role && user.role.toLowerCase() !== role.toLowerCase()) {
     return next(
@@ -73,7 +58,7 @@ const login = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (!user.isActive) {
+  if (user.isActive === false) {
     return next(new AppError('This account has been deactivated. Contact an admin.', 403));
   }
 

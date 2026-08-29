@@ -18,11 +18,8 @@ router.post("/", protect, restrictTo("admin", "mentor"), markAttendance);
 // Update attendance
 router.put("/:id", protect, restrictTo("admin", "mentor"), updateAttendance);
 
-<<<<<<< HEAD
 // Get batch attendance (with optional ?date=YYYY-MM-DD query)
-=======
 // Get batch attendance
->>>>>>> f23b272061739ad39957c55b321398292205d88d
 router.get(
   "/batch/:batchId",
   protect,

@@ -41,7 +41,6 @@ const registerValidation = [
 // ======================================================
 
 const loginValidation = [
-<<<<<<< HEAD
   body().custom((value) => {
     const id = value.userId || value.uniqueId || value.identifier || value.email;
     if (!id || typeof id !== 'string' || !id.trim()) {
@@ -50,8 +49,6 @@ const loginValidation = [
     return true;
   }),
 
-=======
->>>>>>> f23b272061739ad39957c55b321398292205d88d
   body("password")
     .notEmpty()
     .withMessage("Password is required"),

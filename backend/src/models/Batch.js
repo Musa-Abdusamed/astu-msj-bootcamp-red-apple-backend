@@ -9,6 +9,11 @@ const batchSchema = new mongoose.Schema(
       minlength: [2, "Batch name must be at least 2 characters"],
       maxlength: [100, "Batch name cannot exceed 100 characters"],
     },
+    track: {
+        type: String,
+        required: true,    // Add this block to your schema
+        default: 'General' 
+    },
 
     description: {
       type: String,

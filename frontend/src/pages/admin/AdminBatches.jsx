@@ -66,18 +66,27 @@ export default function AdminBatches() {
     e.preventDefault();
     if (!formData.name) return;
 
-    await adminService.createBatch(formData);
-    showToast(`Batch "${formData.name}" created successfully!`);
-    setIsAddModalOpen(false);
-    setFormData({
-      name: '',
-      track: 'Frontend Development',
-      description: '',
-      startDate: '2026-07-01',
-      endDate: '2026-08-30',
-      isActive: true,
-    });
-    fetchBatches();
+    try {
+      // Try to send the request
+      await adminService.createBatch(formData);
+      
+      showToast(`Batch "${formData.name}" created successfully!`);
+      setIsAddModalOpen(false);
+      setFormData({
+        name: '',
+        track: 'Frontend Development',
+        description: '',
+        startDate: '2026-07-01',
+        endDate: '2026-08-30',
+        isActive: true,
+      });
+      fetchBatches();
+    } catch (error) {
+      // If it fails, log the exact error from the backend
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("API Error Details:", error.response?.data);
+      alert(`Failed to create batch: ${errorMessage}`);
+    }
   };
 
   const handleAssignMentor = async (e) => {

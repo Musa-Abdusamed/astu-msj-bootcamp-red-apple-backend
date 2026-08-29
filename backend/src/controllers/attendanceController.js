@@ -188,7 +188,6 @@ const getAttendancePercentage = asyncHandler(async (req, res, next) => {
   const presentSessions = attendance.filter((r) => r.status === "present").length;
   const percentage = (presentSessions / totalSessions) * 100;
 
-<<<<<<< HEAD
   res.status(200).json({
     status: "success",
     data: {
@@ -198,116 +197,6 @@ const getAttendancePercentage = asyncHandler(async (req, res, next) => {
     },
   });
 });
-=======
-const getStudentAttendance = asyncHandler(
-  async (req, res, next) => {
-    const { studentId } = req.params;
-
-    await checkStudentAccess(
-      req,
-      studentId
-    );
-
-    const attendance = await Attendance.find({
-      studentId,
-    })
-      .populate(
-        "studentId",
-        "fullName email role batchId"
-      )
-      .populate(
-        "batchId",
-        "name startDate endDate"
-      )
-      .populate(
-        "markedBy",
-        "fullName email role"
-      )
-      .sort({
-        date: -1,
-      });
-
-    res.status(200).json({
-      status: "success",
-      results: attendance.length,
-      data: {
-        attendance,
-      },
-    });
-  }
-);
-
-const getBatchAttendance = asyncHandler(
-  async (req, res, next) => {
-    const { batchId } = req.params;
-    const { date } = req.query;
-
-    const query = { batchId };
-    if (date) {
-      query.date = date;
-    }
-
-    const attendance = await Attendance.find(query);
-
-    res.status(200).json({
-      status: "success",
-      data: attendance,
-    });
-  }
-);
-
-const getAttendancePercentage = asyncHandler(
-  async (req, res, next) => {
-    const { studentId } = req.params;
-
-    // Check access
-    await checkStudentAccess(
-      req,
-      studentId
-    );
-
-    // Get student's attendance
-    const attendance = await Attendance.find({
-      studentId,
-    });
-
-    // Total sessions
-    const totalSessions = attendance.length;
-
-    // No attendance records
-    if (totalSessions === 0) {
-      return res.status(200).json({
-        status: "success",
-        data: {
-          percentage: 0,
-          presentSessions: 0,
-          totalSessions: 0,
-        },
-      });
-    }
-
-    // Count present sessions
-    const presentSessions = attendance.filter(
-      (record) => record.status === "present"
-    ).length;
-
-    // Calculate percentage
-    const percentage =
-      (presentSessions / totalSessions) * 100;
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        percentage: Number(
-          percentage.toFixed(2)
-        ),
-        presentSessions,
-        totalSessions,
-      },
-    });
-  }
-);
->>>>>>> f23b272061739ad39957c55b321398292205d88d
 
 module.exports = {
   markAttendance,
