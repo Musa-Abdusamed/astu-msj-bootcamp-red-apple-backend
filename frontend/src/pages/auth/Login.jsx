@@ -140,6 +140,11 @@ export default function Login() {
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900"
               />
             </div>
+            <div className="flex justify-end mt-1.5">
+              <Link to="/forgot-password" className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           <button
