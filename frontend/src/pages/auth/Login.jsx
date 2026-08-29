@@ -44,8 +44,8 @@ export default function Login() {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <Link to="/" className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 mb-1">
-            <Shield className="w-6 h-6" />
+          <Link to="/" className="inline-flex items-center justify-center mb-1">
+            <img src="/logo.png" alt="ASTU MSJ Logo" className="w-16 h-16 rounded-full object-contain shadow-md" />
           </Link>
           <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold">
             <Sparkles className="w-3 h-3" />
