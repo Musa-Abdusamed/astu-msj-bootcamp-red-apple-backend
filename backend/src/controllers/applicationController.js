@@ -295,9 +295,11 @@ const acceptApplication = asyncHandler(async (req, res, next) => {
   // GENERATE CUSTOM ID
   // ====================================================
 
+  const cohortYear = new Date().getFullYear().toString().slice(-2);
+
   const userId = await generateCustomId(
     role,
-    application.year
+    cohortYear
   );
 
   // ====================================================
