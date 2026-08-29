@@ -32,7 +32,11 @@ exports.createBatch = async (req, res) => {
 };
 exports.getAllBatches = async (req, res) => {
     try {
-        const batches = await Batch.find();
+        let query = {};
+        if (req.user && req.user.role === 'mentor') {
+            query.mentors = req.user.id || req.user._id;
+        }
+        const batches = await Batch.find(query);
         return res.status(200).json({ success: true, count: batches.length, data: batches });
     } catch (err) {
         return res.status(500).json({ success: false, message: "Server Error" });

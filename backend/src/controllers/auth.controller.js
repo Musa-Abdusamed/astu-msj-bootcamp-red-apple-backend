@@ -147,6 +147,8 @@ const updateProfilePicture = asyncHandler(async (req, res, next) => {
 
   const user = await User.findById(req.user.id);
 
+  console.log("MULTER REQ.FILE:", req.file);
+
   if (!user) {
     return next(new AppError("User not found.", 404));
   }

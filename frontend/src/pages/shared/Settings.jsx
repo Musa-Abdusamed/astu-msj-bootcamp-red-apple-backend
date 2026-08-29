@@ -68,7 +68,7 @@ export default function Settings() {
     setAvatarError('');
     try {
       const formData = new FormData();
-      formData.append('profilePicture', avatarFile);
+      formData.append('profilePicture', avatarFile, 'avatar.jpg');
       const res = await sharedService.updateAvatar(formData);
       const newAvatar = res.data?.avatar || res.avatar;
       updateUser({ avatar: newAvatar });

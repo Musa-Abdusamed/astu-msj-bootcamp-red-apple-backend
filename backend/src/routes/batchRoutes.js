@@ -7,18 +7,17 @@ const batchController = require("../controllers/batchController");
 const { protect } = require("../middleware/auth.middleware");
 const { restrictTo } = require("../middleware/auth.middleware");
 
-// Lock down ALL batch routes to Admins
+// Base protection
 router.use(protect);
-router.use(restrictTo("admin"));
 
 router
   .route("/")
-  .post(validateRequest(createBatchSchema), batchController.createBatch)
-  .get(batchController.getAllBatches);
+  .post(restrictTo("admin"), validateRequest(createBatchSchema), batchController.createBatch)
+  .get(restrictTo("admin", "mentor"), batchController.getAllBatches);
 
-router.route("/:id").get(batchController.getBatchById);
+router.route("/:id").get(restrictTo("admin", "mentor"), batchController.getBatchById);
 
-router.post("/:id/students", batchController.enrollStudent);
-router.post("/:id/mentors", batchController.assignMentor);
+router.post("/:id/students", restrictTo("admin"), batchController.enrollStudent);
+router.post("/:id/mentors", restrictTo("admin"), batchController.assignMentor);
 
 module.exports = router;
