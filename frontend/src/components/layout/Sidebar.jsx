@@ -13,6 +13,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { SERVER_URL } from '../../api/axios';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
@@ -112,7 +113,7 @@ export default function Sidebar() {
         <div className="px-3 py-2 rounded-xl bg-slate-800/40 border border-slate-800/80 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center border border-indigo-500/30 font-mono overflow-hidden shrink-0">
             {user?.avatar && user.avatar !== 'default-avatar.png' ? (
-              <img src={`http://localhost:5000/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+              <img src={`${SERVER_URL}/uploads/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               user?.fullName ? user.fullName.charAt(0).toUpperCase() : (user?.userId ? user.userId.charAt(0).toUpperCase() : 'U')
             )}

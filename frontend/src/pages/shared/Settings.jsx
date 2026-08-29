@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { sharedService } from '../../api/sharedService';
 import { useAuth } from '../../context/AuthContext';
+import { SERVER_URL } from '../../api/axios';
 import { ShieldCheck, CheckCircle2, AlertTriangle, ArrowRight, KeyRound, Lock, UserCheck, Upload, Image as ImageIcon, X } from 'lucide-react';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../../utils/cropImage';
@@ -69,7 +70,8 @@ export default function Settings() {
       const formData = new FormData();
       formData.append('profilePicture', avatarFile);
       const res = await sharedService.updateAvatar(formData);
-      updateUser({ avatar: res.data.user.avatar });
+      const newAvatar = res.data?.avatar || res.avatar;
+      updateUser({ avatar: newAvatar });
       setAvatarSuccess('Profile picture updated successfully!');
       setAvatarFile(null);
     } catch (err) {
@@ -198,7 +200,7 @@ export default function Settings() {
             {avatarPreview ? (
               <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
             ) : user?.avatar && user.avatar !== 'default-avatar.png' ? (
-              <img src={`http://localhost:5000/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+              <img src={`${SERVER_URL}/uploads/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               <UserCheck className="w-8 h-8 text-slate-400" />
             )}
