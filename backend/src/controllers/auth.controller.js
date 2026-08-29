@@ -129,7 +129,7 @@ const changePassword = asyncHandler(async (req, res, next) => {
   user.mustChangeCredentials = false;
   user.passwordChangedAt = Date.now();
 
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
 
   createSendToken(user, 200, res);
 });
@@ -153,7 +153,7 @@ const updateProfilePicture = asyncHandler(async (req, res, next) => {
 
   user.avatar = req.file.path;
 
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
 
   res.status(200).json({
     status: "success",
@@ -319,7 +319,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   user.mustChangeCredentials = false;
   user.passwordChangedAt = Date.now();
 
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
 
   res.status(200).json({
     status: "success",
