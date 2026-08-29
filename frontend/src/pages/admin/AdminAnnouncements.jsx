@@ -22,6 +22,7 @@ export default function AdminAnnouncements() {
   const [filterAudience, setFilterAudience] = useState('all');
   const [toast, setToast] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -94,16 +95,17 @@ export default function AdminAnnouncements() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this announcement?')) {
-      try {
-        await adminService.deleteAnnouncement(id);
-        showToast('Announcement removed.');
-        fetchData();
-      } catch (err) {
-        console.error('Failed to delete announcement:', err);
-        showToast('Failed to remove announcement.');
-      }
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    try {
+      await adminService.deleteAnnouncement(deleteConfirmId);
+      showToast('Announcement removed.');
+      fetchData();
+    } catch (err) {
+      console.error('Failed to delete announcement:', err);
+      showToast('Failed to remove announcement.');
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -213,7 +215,7 @@ export default function AdminAnnouncements() {
                   </div>
 
                   <button
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => setDeleteConfirmId(item._id)}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                     title="Delete Announcement"
                   >
@@ -336,6 +338,35 @@ export default function AdminAnnouncements() {
                 <span>{isSubmitting ? 'Publishing...' : 'Publish Announcement'}</span>
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Confirm Delete */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Announcement?</h3>
+            <p className="text-slate-500 text-sm mb-6">
+              Are you sure you want to delete this announcement? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 text-sm">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 shadow-sm shadow-rose-200 transition cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

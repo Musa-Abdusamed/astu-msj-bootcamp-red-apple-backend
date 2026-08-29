@@ -4,6 +4,7 @@ import LandingPage from '../pages/landing/LandingPage';
 import ApplyPage from '../pages/landing/ApplyPage';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
+import ForgotPassword from '../pages/auth/ForgotPassword';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import RoleGuard from '../components/auth/RoleGuard';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -47,6 +48,7 @@ export default function AppRoutes() {
       <Route path="/apply" element={<ApplyPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Navigate to="/login" replace />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected Admin Routes */}
       <Route element={<ProtectedRoute />}>
