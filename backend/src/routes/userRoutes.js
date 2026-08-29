@@ -17,15 +17,14 @@ router.patch(
 );
 
 router.use(protect);
-router.use(restrictTo('admin'));
 
 router.route('/')
-    .post(validateRequest(createUserSchema), userController.createUser)
-    .get(userController.getAllUsers);
+    .post(restrictTo('admin'), validateRequest(createUserSchema), userController.createUser)
+    .get(restrictTo('admin', 'mentor'), userController.getAllUsers);
 
 router.route('/:id')
-    .get(userController.getUserById)
-    .put(userController.updateUser)
-    .delete(userController.deleteUser);
+    .get(restrictTo('admin', 'mentor'), userController.getUserById)
+    .put(restrictTo('admin'), userController.updateUser)
+    .delete(restrictTo('admin'), userController.deleteUser);
 
 module.exports = router;
