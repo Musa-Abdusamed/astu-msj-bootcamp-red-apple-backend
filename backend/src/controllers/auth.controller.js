@@ -161,7 +161,7 @@ const updateProfilePicture = asyncHandler(async (req, res, next) => {
     status: "success",
     message: "Profile picture updated successfully.",
     data: {
-      avatar: user.avatar,
+      user: user
     },
   });
 });

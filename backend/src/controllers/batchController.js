@@ -68,14 +68,18 @@ exports.getBatchById = async (req, res) => {
 exports.assignMentor = async (req, res) => {
     try {
         const { mentorId } = req.body;
-        
         const batch = await Batch.findByIdAndUpdate(
             req.params.id,
             { $addToSet: { mentors: mentorId } },
-            { returnDocument: "after" }
-        ).populate('mentors', 'fullName email');
+            { new: true }
+        ).populate('mentors', 'fullName email role');
 
         if (!batch) return res.status(404).json({ success: false, message: "Batch not found" });
+        
+        if (mentorId) {
+            await User.findByIdAndUpdate(mentorId, { batchId: req.params.id });
+        }
+
         return res.status(200).json({ success: true, message: "Mentor assigned", data: batch });
     } catch (err) {
         console.error("Error in assignMentor:", err);
