@@ -65,7 +65,8 @@ export default function MentorAttendance() {
       );
       setStudents(batchStudents);
 
-      const existingRecords = (attRes.status === 'fulfilled' ? attRes.value.data : []) || [];
+      const rawData = attRes.status === 'fulfilled' ? attRes.value.data : null;
+      const existingRecords = rawData?.attendance || rawData || [];
 
       // Map existing records by student ID
       const recordByStudent = {};
@@ -220,11 +221,17 @@ export default function MentorAttendance() {
 
         <button
           onClick={handleSaveAttendance}
-          disabled={isSaving || students.length === 0}
-          className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm shadow-indigo-200 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          disabled={isSaving || students.length === 0 || students.some((st) => attendanceMap[st._id]?.recordId)}
+          className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm shadow-indigo-200 transition flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:bg-slate-400 disabled:shadow-none"
         >
           <Save className="w-4 h-4" />
-          <span>{isSaving ? 'Saving Records...' : 'Save Attendance'}</span>
+          <span>
+            {isSaving 
+              ? 'Saving...' 
+              : students.some((st) => attendanceMap[st._id]?.recordId) 
+                ? 'Attendance Saved' 
+                : 'Save Attendance'}
+          </span>
         </button>
       </div>
 
