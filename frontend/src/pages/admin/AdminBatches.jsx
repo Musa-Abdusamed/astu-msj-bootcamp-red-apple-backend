@@ -85,7 +85,7 @@ export default function AdminBatches() {
       // If it fails, log the exact error from the backend
       const errorMessage = error.response?.data?.message || error.message;
       console.error("API Error Details:", error.response?.data);
-      alert(`Failed to create batch: ${errorMessage}`);
+      showToast(`Failed to create batch: ${errorMessage}`);
     }
   };
 
