@@ -1,7 +1,14 @@
-const User = require('../models/User');
-const AppError = require('../utils/AppError');
-const asyncHandler = require('../utils/asyncHandler');
-const { createSendToken } = require('../services/auth.service');
+const crypto = require("crypto");
+
+const User = require("../models/User");
+const AppError = require("../utils/AppError");
+const asyncHandler = require("../utils/asyncHandler");
+const { createSendToken } = require("../services/auth.service");
+const sendEmail = require("../utils/sendEmail");
+
+// ======================================================
+// REGISTER
+// ======================================================
 
 const register = asyncHandler(async (req, res, next) => {
   const { fullName, email, password, role, userId } = req.body;
@@ -9,7 +16,9 @@ const register = asyncHandler(async (req, res, next) => {
   const existingUser = await User.findOne({ email });
 
   if (existingUser) {
-    return next(new AppError('An account with that email already exists.', 400));
+    return next(
+      new AppError("An account with that email already exists.", 400)
+    );
   }
 
   const newUser = await User.create({
@@ -17,8 +26,8 @@ const register = asyncHandler(async (req, res, next) => {
     fullName,
     email,
     password,
-    role: role || 'student',
-    mustChangeCredentials: true 
+    role: role || "student",
+    mustChangeCredentials: true,
   });
 
   createSendToken(newUser, 201, res);
@@ -29,52 +38,27 @@ const register = asyncHandler(async (req, res, next) => {
 // ======================================================
 
 const login = asyncHandler(async (req, res, next) => {
-  const identifier = (req.body.userId || req.body.uniqueId || req.body.identifier || req.body.email || '').trim();
-  const { password, role } = req.body;
+  const { email, password } = req.body;
 
-  if (!identifier || !password) {
-    return next(new AppError('Please provide your Unique ID or email and password.', 400));
-  }
-
-  // Find user by Unique ID or Email
-  const escapedIdentifier = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const user = await User.findOne({
-    $or: [
-      { userId: { $regex: new RegExp(`^${escapedIdentifier}$`, 'i') } },
-      { email: identifier.toLowerCase() },
-    ],
-  }).select("+password");
-
-  if (!user || !(await user.comparePassword(password))) {
-    return next(new AppError('Incorrect credentials or password.', 401));
-  const { email, userId, password } = req.body;
-  const identifier = email || userId;
-
-  if (!identifier || !password) {
+  if (!email || !password) {
     return next(
-      new AppError("Please provide email/userId and password.", 400)
+      new AppError("Please provide email and password.", 400)
     );
   }
 
-  const user = await User.findOne({
-    $or: [{ email: identifier }, { userId: identifier }]
-  }).select("+password");
+  const user = await User.findOne({ email }).select("+password");
 
   if (!user || !(await user.comparePassword(password))) {
-    return next(new AppError("Incorrect credentials.", 401));
-  }
-
-  if (role && user.role.toLowerCase() !== role.toLowerCase()) {
-    return next(
-      new AppError(
-        `This account is registered as a ${user.role}. Please select the ${user.role} role to sign in.`,
-        403
-      )
-    );
+    return next(new AppError("Incorrect email or password.", 401));
   }
 
   if (!user.isActive) {
-    return next(new AppError('This account has been deactivated. Contact an admin.', 403));
+    return next(
+      new AppError(
+        "This account has been deactivated. Contact an admin.",
+        403
+      )
+    );
   }
 
   createSendToken(user, 200, res);
@@ -89,7 +73,11 @@ const logout = asyncHandler(async (req, res) => {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   });
-  res.status(200).json({ status: 'success', message: 'Logged out successfully.' });
+
+  res.status(200).json({
+    status: "success",
+    message: "Logged out successfully.",
+  });
 });
 
 // ======================================================
@@ -98,22 +86,30 @@ const logout = asyncHandler(async (req, res) => {
 
 const getMe = asyncHandler(async (req, res) => {
   res.status(200).json({
-    status: 'success',
-    data: { user: req.user },
+    status: "success",
+    data: {
+      user: req.user,
+    },
   });
 });
 
 // ======================================================
-// CHANGE PASSWORD
+// CHANGE PASSWORD - LOGGED IN USER
 // ======================================================
 
 const changePassword = asyncHandler(async (req, res, next) => {
   const { currentPassword, newPassword } = req.body;
 
-  const user = await User.findById(req.user.id).select('+password');
+  const user = await User.findById(req.user.id).select("+password");
+
+  if (!user) {
+    return next(new AppError("User not found.", 404));
+  }
 
   if (!(await user.comparePassword(currentPassword))) {
-    return next(new AppError('Your current password is incorrect.', 401));
+    return next(
+      new AppError("Your current password is incorrect.", 401)
+    );
   }
 
   user.password = newPassword;
@@ -125,28 +121,211 @@ const changePassword = asyncHandler(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+// ======================================================
+// UPDATE PROFILE PICTURE
+// ======================================================
+
 const updateProfilePicture = asyncHandler(async (req, res, next) => {
   if (!req.file) {
-    return next(new AppError("Please upload a profile picture.", 400));
+    return next(
+      new AppError("Please upload a profile picture.", 400)
+    );
   }
 
-  const user = await User.findByIdAndUpdate(
-    req.user.id,
-    { avatar: 'uploads/' + req.file.filename },
-    { new: true, runValidators: false }
-  );
+  const user = await User.findById(req.user.id);
 
   if (!user) {
     return next(new AppError("User not found.", 404));
   }
 
+  user.avatar = req.file.filename;
+
+  await user.save();
+
   res.status(200).json({
     status: "success",
     message: "Profile picture updated successfully.",
     data: {
-      user,
+      avatar: user.avatar,
     },
   });
 });
 
-module.exports = { register, login, logout, getMe, changePassword, updateProfilePicture };
+// ======================================================
+// FORGOT PASSWORD - SEND OTP
+// ======================================================
+
+const forgotPassword = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  // Do not reveal whether an account exists
+  if (!user) {
+    return res.status(200).json({
+      status: "success",
+      message:
+        "If an account exists with this email, a password reset OTP has been sent.",
+    });
+  }
+
+  // Generate 6-digit OTP
+  const otp = crypto.randomInt(100000, 1000000).toString();
+
+  // Hash OTP before storing it
+  const hashedOTP = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
+
+  user.passwordResetOTP = hashedOTP;
+
+  // OTP valid for 10 minutes
+  user.passwordResetOTPExpires = Date.now() + 10 * 60 * 1000;
+
+  await user.save({
+    validateBeforeSave: false,
+  });
+
+  try {
+    await sendEmail({
+      to: user.email,
+
+      subject: "ASTU MSJ Bootcamp - Password Reset OTP",
+
+      text: `
+Dear ${user.fullName},
+
+We received a request to reset your ASTU MSJ Bootcamp account password.
+
+Your password reset OTP is:
+
+${otp}
+
+This OTP will expire in 10 minutes.
+
+If you did not request a password reset, please ignore this email.
+
+ASTU MSJ Bootcamp Team
+`,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message:
+        "If an account exists with this email, a password reset OTP has been sent.",
+    });
+  } catch (error) {
+    // Remove OTP if email sending fails
+    user.passwordResetOTP = undefined;
+    user.passwordResetOTPExpires = undefined;
+
+    await user.save({
+      validateBeforeSave: false,
+    });
+
+    return next(
+      new AppError(
+        "Unable to send password reset OTP. Please try again later.",
+        500
+      )
+    );
+  }
+});
+
+// ======================================================
+// RESET PASSWORD - OTP + NEW PASSWORD
+// ======================================================
+
+const resetPassword = asyncHandler(async (req, res, next) => {
+  const {
+    email,
+    otp,
+    newPassword,
+    confirmPassword,
+  } = req.body;
+
+  if (!email || !otp || !newPassword || !confirmPassword) {
+    return next(
+      new AppError(
+        "Email, OTP, new password, and confirm password are required.",
+        400
+      )
+    );
+  }
+
+  if (newPassword !== confirmPassword) {
+    return next(
+      new AppError(
+        "New password and confirm password do not match.",
+        400
+      )
+    );
+  }
+
+  if (newPassword.length < 8) {
+    return next(
+      new AppError(
+        "New password must be at least 8 characters long.",
+        400
+      )
+    );
+  }
+
+  // Hash submitted OTP
+  const hashedOTP = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
+
+  // Find user with valid OTP
+  const user = await User.findOne({
+    email,
+    passwordResetOTP: hashedOTP,
+    passwordResetOTPExpires: {
+      $gt: Date.now(),
+    },
+  }).select(
+    "+passwordResetOTP +passwordResetOTPExpires"
+  );
+
+  if (!user) {
+    return next(
+      new AppError("Invalid or expired OTP.", 400)
+    );
+  }
+
+  // Update password
+  user.password = newPassword;
+
+  // Remove OTP
+  user.passwordResetOTP = undefined;
+  user.passwordResetOTPExpires = undefined;
+
+  // Password is now changed
+  user.mustChangeCredentials = false;
+  user.passwordChangedAt = Date.now();
+
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message:
+      "Password reset successfully. You can now log in with your new password.",
+  });
+});
+
+// ======================================================
+// EXPORTS
+// ======================================================
+
+module.exports = {
+  register,
+  login,
+  logout,
+  getMe,
+  changePassword,
+  updateProfilePicture,
+  forgotPassword,
+  resetPassword,
+};
