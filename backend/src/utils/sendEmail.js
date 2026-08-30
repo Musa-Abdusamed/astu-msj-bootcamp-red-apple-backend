@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 
 const sendEmail = async ({ to, subject, text, html }) => {
   console.log("========== EMAIL CONFIG ==========");
@@ -9,11 +10,9 @@ const sendEmail = async ({ to, subject, text, html }) => {
   console.log("FROM:", process.env.EMAIL_FROM);
   console.log("=================================");
 
-  const isGmail = (process.env.SMTP_HOST || '').includes('gmail.com');
   const port = Number(process.env.SMTP_PORT) || 465;
   const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
-  // Force IPv4 by NOT using 'service: gmail' and explicitly setting host and family
   const transportConfig = {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: port,
@@ -25,8 +24,12 @@ const sendEmail = async ({ to, subject, text, html }) => {
     tls: {
       rejectUnauthorized: false
     },
-    // This forces Node to use IPv4 instead of IPv6 (fixes ENETUNREACH on Render/Vercel)
-    family: 4
+    // Force IPv4 locally just for this email connection (safest approach)
+    lookup: (hostname, options, callback) => {
+      dns.lookup(hostname, { family: 4 }, (err, address, family) => {
+        callback(err, address, family);
+      });
+    }
   };
 
   const transporter = nodemailer.createTransport(transportConfig);
