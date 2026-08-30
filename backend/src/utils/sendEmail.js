@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const dns = require("dns");
 
-// Force IPv4 DNS resolution globally for this process
+
 // This is required because Nodemailer sometimes ignores the 'lookup' parameter
 try {
   dns.setDefaultResultOrder("ipv4first");
