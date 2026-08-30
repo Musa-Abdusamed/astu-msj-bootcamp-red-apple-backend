@@ -45,6 +45,16 @@ export const adminService = {
     return res.data;
   },
 
+  createApplicationSetting: async (data) => {
+    const res = await api.post('/applications/settings', data);
+    return res.data;
+  },
+
+  closeApplications: async () => {
+    const res = await api.patch('/applications/settings/close');
+    return res.data;
+  },
+
   getApplications: async () => {
     const res = await api.get('/applications');
     return res.data;

@@ -1,4 +1,13 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
+
+// Force IPv4 DNS resolution globally for this process
+// This is required because Nodemailer sometimes ignores the 'lookup' parameter
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch (e) {
+  // Ignore
+}
 
 const sendEmail = async ({ to, subject, text, html }) => {
   console.log("========== EMAIL CONFIG ==========");
@@ -9,27 +18,21 @@ const sendEmail = async ({ to, subject, text, html }) => {
   console.log("FROM:", process.env.EMAIL_FROM);
   console.log("=================================");
 
-  const isGmail = (process.env.SMTP_HOST || '').includes('gmail.com');
   const port = Number(process.env.SMTP_PORT) || 465;
   const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
-  const transportConfig = isGmail
-    ? {
-        service: "gmail",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD,
-        },
-      }
-    : {
-        host: process.env.SMTP_HOST,
-        port,
-        secure,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD,
-        },
-      };
+  const transportConfig = {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: port,
+    secure: secure,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  };
 
   const transporter = nodemailer.createTransport(transportConfig);
 
