@@ -22,20 +22,17 @@ const {
 
 const router = express.Router();
 
-// ======================================================
+
 // PUBLIC - CHECK APPLICATION STATUS
-// GET /api/applications/status
-// ======================================================
+
 
 router.get(
   "/status",
   getApplicationStatus
 );
 
-// ======================================================
+
 // ADMIN - CREATE / OPEN APPLICATION PERIOD
-// POST /api/applications/settings
-// ======================================================
 
 router.post(
   "/settings",
@@ -44,10 +41,8 @@ router.post(
   createApplicationSetting
 );
 
-// ======================================================
 // ADMIN - CLOSE APPLICATIONS MANUALLY
-// PATCH /api/applications/settings/close
-// ======================================================
+
 
 router.patch(
   "/settings/close",
@@ -56,10 +51,10 @@ router.patch(
   closeApplications
 );
 
-// ======================================================
+
 // PUBLIC APPLICATION SUBMISSION
-// POST /api/applications
-// ======================================================
+
+
 
 router.post(
   "/",
@@ -68,10 +63,8 @@ router.post(
   submitApplication
 );
 
-// ======================================================
+
 // ADMIN - GET ALL APPLICATIONS
-// GET /api/applications
-// ======================================================
 
 router.get(
   "/",
@@ -80,10 +73,8 @@ router.get(
   getApplications
 );
 
-// ======================================================
 // ADMIN - ACCEPT APPLICATION
-// PATCH /api/applications/:id/accept
-// ======================================================
+
 
 router.patch(
   "/:id/accept",
@@ -92,10 +83,6 @@ router.patch(
   acceptApplication
 );
 
-// ======================================================
-// ADMIN - REJECT APPLICATION
-// PATCH /api/applications/:id/reject
-// ======================================================
 
 router.patch(
   "/:id/reject",

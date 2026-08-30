@@ -330,9 +330,7 @@ const acceptApplication = asyncHandler(async (req, res, next) => {
     return next(error);
   }
 
-  // ====================================================
-  // SEND ACCEPTANCE EMAIL
-  // ====================================================
+
 
   // ====================================================
   // SEND ACCEPTANCE EMAIL
@@ -431,16 +429,11 @@ ASTU MSJ Bootcamp Team
     );
   }
 
-  // ====================================================
-  // EMAIL SUCCESSFUL → ACCEPT APPLICATION
-  // ====================================================
+
 
   application.status = "Accepted";
   await application.save();
 
-  // ====================================================
-  // RESPONSE
-  // ====================================================
 
   res.status(201).json({
     status: "success",
@@ -526,9 +519,6 @@ ASTU MSJ Bootcamp Team
   });
 });
 
-// ======================================================
-// EXPORTS
-// ======================================================
 
 module.exports = {
   getApplicationStatus,

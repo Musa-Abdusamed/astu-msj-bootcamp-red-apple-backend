@@ -58,9 +58,9 @@ const checkStudentAccess = async (req, studentId) => {
   );
 };
 
-// ======================================================
+
 // MARK ATTENDANCE
-// ======================================================
+
 
 const markAttendance = asyncHandler(async (req, res, next) => {
   const { studentId, date, status, note } = req.body;
@@ -120,9 +120,9 @@ const markAttendance = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ======================================================
+
 // UPDATE ATTENDANCE
-// ======================================================
+
 
 const updateAttendance = asyncHandler(async (req, res, next) => {
   const { status, date, note } = req.body;
@@ -160,9 +160,9 @@ const updateAttendance = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ======================================================
+
 // GET STUDENT ATTENDANCE
-// ======================================================
+
 
 const getStudentAttendance = asyncHandler(async (req, res, next) => {
   const { studentId } = req.params;
@@ -182,9 +182,9 @@ const getStudentAttendance = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ======================================================
+
 // GET BATCH ATTENDANCE
-// ======================================================
+
 
 const getBatchAttendance = asyncHandler(async (req, res, next) => {
   const { batchId } = req.params;
@@ -208,9 +208,9 @@ const getBatchAttendance = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ======================================================
+
 // GET ATTENDANCE PERCENTAGE
-// ======================================================
+
 
 const getAttendancePercentage = asyncHandler(
   async (req, res, next) => {
@@ -251,9 +251,6 @@ const getAttendancePercentage = asyncHandler(
   }
 );
 
-// ======================================================
-// EXPORTS
-// ======================================================
 
 module.exports = {
   markAttendance,

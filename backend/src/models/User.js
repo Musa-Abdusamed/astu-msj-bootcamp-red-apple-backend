@@ -78,9 +78,8 @@ const userSchema = new mongoose.Schema(
 
     passwordChangedAt: Date,
 
-    // ==========================================
-    // PASSWORD RESET
-    // ==========================================
+    // PASSWORD RESET TOKEN AND EXPIRATION
+    
 
     passwordResetOTP: {
       type: String,
@@ -97,9 +96,9 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// ==========================================
+
 // HASH PASSWORD
-// ==========================================
+
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
@@ -107,17 +106,17 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 12);
 });
 
-// ==========================================
+
 // COMPARE PASSWORD
-// ==========================================
+
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// ==========================================
+
 // CHECK PASSWORD CHANGE AFTER JWT
-// ==========================================
+
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (!this.passwordChangedAt) {

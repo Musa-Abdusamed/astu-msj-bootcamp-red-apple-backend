@@ -7,9 +7,9 @@ const AppError = require('../utils/AppError');
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'astu-msj-bootcamp/avatars', // The folder name inside your Cloudinary account
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'], // Only allow these formats
-    transformation: [{ width: 500, height: 500, crop: 'fill' }] // Automatically crops avatars to perfect squares!
+    folder: 'astu-msj-bootcamp/avatars', 
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'], 
+    transformation: [{ width: 500, height: 500, crop: 'fill' }] 
   },
 });
 

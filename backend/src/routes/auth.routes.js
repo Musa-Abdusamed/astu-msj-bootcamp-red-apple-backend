@@ -18,9 +18,9 @@ const upload = require("../middleware/upload.middleware");
 
 const router = express.Router();
 
-// ======================================================
+
 // REGISTER VALIDATION
-// ======================================================
+
 
 const registerValidation = [
   body("fullName")
@@ -38,9 +38,9 @@ const registerValidation = [
     .withMessage("Password must be at least 8 characters long"),
 ];
 
-// ======================================================
+
 // LOGIN VALIDATION
-// ======================================================
+
 
 const loginValidation = [
   body().custom((value) => {
@@ -55,9 +55,9 @@ const loginValidation = [
     .withMessage("Password is required"),
 ];
 
-// ======================================================
+
 // CHANGE PASSWORD VALIDATION
-// ======================================================
+
 
 const changePasswordValidation = [
   body("currentPassword")
@@ -69,9 +69,9 @@ const changePasswordValidation = [
     .withMessage("New password must be at least 8 characters long"),
 ];
 
-// ======================================================
+
 // FORGOT PASSWORD VALIDATION
-// ======================================================
+
 
 const forgotPasswordValidation = [
   body("email")
@@ -80,9 +80,9 @@ const forgotPasswordValidation = [
     .normalizeEmail(),
 ];
 
-// ======================================================
+
 // RESET PASSWORD VALIDATION
-// ======================================================
+
 
 const resetPasswordValidation = [
   body("email")
@@ -110,9 +110,9 @@ const resetPasswordValidation = [
     .withMessage("Passwords do not match"),
 ];
 
-// ======================================================
+
 // REGISTER
-// ======================================================
+
 
 router.post(
   "/register",
@@ -121,9 +121,9 @@ router.post(
   register
 );
 
-// ======================================================
+
 // LOGIN
-// ======================================================
+
 
 router.post(
   "/login",
@@ -132,9 +132,9 @@ router.post(
   login
 );
 
-// ======================================================
+
 // LOGOUT
-// ======================================================
+
 
 router.post(
   "/logout",
@@ -142,9 +142,9 @@ router.post(
   logout
 );
 
-// ======================================================
+
 // GET CURRENT USER
-// ======================================================
+
 
 router.get(
   "/me",
@@ -152,9 +152,9 @@ router.get(
   getMe
 );
 
-// ======================================================
+
 // CHANGE PASSWORD
-// ======================================================
+
 
 router.patch(
   "/change-password",
@@ -164,9 +164,9 @@ router.patch(
   changePassword
 );
 
-// ======================================================
+
 // PROFILE PICTURE
-// ======================================================
+
 
 router.patch(
   "/profile-picture",
@@ -175,11 +175,7 @@ router.patch(
   updateProfilePicture
 );
 
-// ======================================================
 // FORGOT PASSWORD
-// ======================================================
-
-// User enters email.
 // Server sends OTP to that email.
 router.post(
   "/forgot-password",
@@ -188,12 +184,9 @@ router.post(
   forgotPassword
 );
 
-// ======================================================
-// RESET PASSWORD
-// ======================================================
 
-// User provides:
-// email + OTP + new password + confirmation
+// RESET PASSWORD
+
 router.post(
   "/reset-password",
   resetPasswordValidation,

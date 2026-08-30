@@ -3,20 +3,19 @@ const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/AppError");
 
 // CREATE ANNOUNCEMENT
-// POST /api/announcements
-// Private - Admin / Mentor
+
 const createAnnouncement = asyncHandler(async (req, res, next) => {
   const { title, content, targetAudience, targetYear, batchId, publishDate, urgent } =
     req.body;
 
-  // Basic validation
+  
   if (!title || !content || !targetAudience) {
     return next(
       new AppError("Title, content, and target audience are required", 400),
     );
   }
 
-  // If target audience is batch, batchId is required
+  
   if (targetAudience === "batch" && !batchId) {
     return next(
       new AppError("Batch ID is required when target audience is batch", 400),

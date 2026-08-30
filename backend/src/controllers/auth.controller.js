@@ -6,9 +6,9 @@ const asyncHandler = require("../utils/asyncHandler");
 const { createSendToken } = require("../services/auth.service");
 const sendEmail = require("../utils/sendEmail");
 
-// ======================================================
+
 // REGISTER
-// ======================================================
+
 
 const register = asyncHandler(async (req, res, next) => {
   const { fullName, email, password, role, userId } = req.body;
@@ -33,13 +33,9 @@ const register = asyncHandler(async (req, res, next) => {
   createSendToken(newUser, 201, res);
 });
 
-// ======================================================
-// LOGIN
-// ======================================================
 
-// ======================================================
 // LOGIN
-// ======================================================
+
 
 const login = asyncHandler(async (req, res, next) => {
   const { email, userId, password, role } = req.body;
@@ -77,9 +73,9 @@ const login = asyncHandler(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-// ======================================================
+
 // LOGOUT
-// ======================================================
+
 
 const logout = asyncHandler(async (req, res) => {
   res.cookie("token", "loggedout", {
@@ -93,9 +89,9 @@ const logout = asyncHandler(async (req, res) => {
   });
 });
 
-// ======================================================
+
 // GET CURRENT USER
-// ======================================================
+
 
 const getMe = asyncHandler(async (req, res) => {
   res.status(200).json({
@@ -106,9 +102,9 @@ const getMe = asyncHandler(async (req, res) => {
   });
 });
 
-// ======================================================
+
 // CHANGE PASSWORD - LOGGED IN USER
-// ======================================================
+
 
 const changePassword = asyncHandler(async (req, res, next) => {
   const { currentPassword, newPassword } = req.body;
@@ -134,9 +130,9 @@ const changePassword = asyncHandler(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-// ======================================================
+
 // UPDATE PROFILE PICTURE
-// ======================================================
+
 
 const updateProfilePicture = asyncHandler(async (req, res, next) => {
   if (!req.file) {
@@ -166,9 +162,8 @@ const updateProfilePicture = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ======================================================
+
 // FORGOT PASSWORD - SEND OTP
-// ======================================================
 
 const forgotPassword = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
@@ -248,9 +243,9 @@ ASTU MSJ Bootcamp Team
   }
 });
 
-// ======================================================
+
 // RESET PASSWORD - OTP + NEW PASSWORD
-// ======================================================
+
 
 const resetPassword = asyncHandler(async (req, res, next) => {
   const {
@@ -330,9 +325,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ======================================================
-// EXPORTS
-// ======================================================
+
 
 module.exports = {
   register,
