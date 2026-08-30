@@ -1,6 +1,14 @@
 const nodemailer = require("nodemailer");
 const dns = require("dns");
 
+// Force IPv4 DNS resolution globally for this process
+// This is required because Nodemailer sometimes ignores the 'lookup' parameter
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch (e) {
+  // Ignore
+}
+
 const sendEmail = async ({ to, subject, text, html }) => {
   console.log("========== EMAIL CONFIG ==========");
   console.log("HOST:", process.env.SMTP_HOST);
@@ -23,12 +31,6 @@ const sendEmail = async ({ to, subject, text, html }) => {
     },
     tls: {
       rejectUnauthorized: false
-    },
-    // Force IPv4 locally just for this email connection (safest approach)
-    lookup: (hostname, options, callback) => {
-      dns.lookup(hostname, { family: 4 }, (err, address, family) => {
-        callback(err, address, family);
-      });
     }
   };
 

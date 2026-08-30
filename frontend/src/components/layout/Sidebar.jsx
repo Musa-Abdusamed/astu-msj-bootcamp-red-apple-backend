@@ -15,7 +15,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { SERVER_URL } from '../../api/axios';
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }) {
   const { user, logout } = useAuth();
   const role = user?.role?.toLowerCase() || 'admin';
 
@@ -62,20 +62,32 @@ export default function Sidebar() {
     <aside className="w-64 bg-slate-900 text-white min-h-screen flex flex-col justify-between p-4 border-r border-slate-800 shrink-0 sticky top-0 h-screen overflow-y-auto">
       <div>
         {/* Brand */}
-        <div className="flex items-center gap-3 px-3 py-4 mb-4 border-b border-slate-800">
-          <img src="/logo.png" alt="ASTU MSJ Logo" className="w-10 h-10 rounded-full object-contain shadow-md shadow-indigo-500/20" />
-          <div>
-            <div className="text-sm font-bold text-white flex items-center gap-1.5">
-              <span>ASTU MSJ</span>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase">
-                {role}
-              </span>
-            </div>
-            <div className="text-[11px] text-slate-400 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <span className="capitalize">{role} Panel</span>
+        <div className="flex items-center justify-between px-3 py-4 mb-4 border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="ASTU MSJ Logo" className="w-10 h-10 rounded-full object-contain shadow-md shadow-indigo-500/20" />
+            <div>
+              <div className="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>ASTU MSJ</span>
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase">
+                  {role}
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <span className="capitalize">{role} Panel</span>
+              </div>
             </div>
           </div>
+          
+          {/* Mobile Close Button */}
+          {onClose && (
+            <button 
+              onClick={onClose}
+              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
@@ -89,6 +101,7 @@ export default function Sidebar() {
               <NavLink
                 key={link.name}
                 to={link.path}
+                onClick={onClose}
                 end={link.path === '/admin' || link.path === '/mentor' || link.path === '/student'}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
