@@ -10,7 +10,9 @@ import {
   GraduationCap,
   FileText,
   Layers,
-  ArrowLeft
+  ArrowLeft,
+  Lock,
+  Clock
 } from 'lucide-react';
 import { adminService } from '../../api/adminService';
 
@@ -39,6 +41,24 @@ export default function ApplyPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  const [appStatus, setAppStatus] = useState(null);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await adminService.getApplicationStatus();
+        setAppStatus(res?.data?.data || res?.data || { isOpen: false });
+      } catch (err) {
+        console.error('Failed to check application status:', err);
+        setAppStatus({ isOpen: false });
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+    fetchStatus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -131,17 +151,50 @@ export default function ApplyPage() {
                 </p>
               </div>
 
-              {errorMsg && (
-                <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 shrink-0" />
-                  <div>
-                    <span className="font-bold block">Submission Error</span>
-                    <span>{errorMsg}</span>
+              {isLoadingSettings ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <div className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></div>
+                  <div className="text-sm font-semibold text-slate-500 animate-pulse">Checking application status...</div>
+                </div>
+              ) : !appStatus?.isOpen ? (
+                <div className="text-center py-10 space-y-4">
+                  <div className="w-20 h-20 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2 border border-slate-200 shadow-sm">
+                    <Lock className="w-10 h-10" />
+                  </div>
+                  <h3 className="text-2xl font-extrabold text-slate-900">Applications are Closed</h3>
+                  <p className="text-base text-slate-600 max-w-md mx-auto leading-relaxed">
+                    The application poll is currently closed for now. We are not accepting any new applications at this time.
+                  </p>
+                  
+                  {appStatus?.startDate && new Date() < new Date(appStatus.startDate) && (
+                    <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 text-sm font-semibold">
+                      <Clock className="w-4 h-4 text-amber-600" />
+                      Applications will open on: {new Date(appStatus.startDate).toLocaleString()}
+                    </div>
+                  )}
+
+                  <div className="pt-6">
+                    <button
+                      onClick={() => navigate('/')}
+                      className="px-8 py-3 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition cursor-pointer"
+                    >
+                      Return to Home
+                    </button>
                   </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  {errorMsg && (
+                    <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 shrink-0" />
+                      <div>
+                        <span className="font-bold block">Submission Error</span>
+                        <span>{errorMsg}</span>
+                      </div>
+                    </div>
+                  )}
 
-              <form onSubmit={handleSubmit} className="space-y-6 text-sm">
+                  <form onSubmit={handleSubmit} className="space-y-6 text-sm">
                 {/* Section 1: Learning Track & Role */}
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-4 shadow-sm">
                   <div className="flex items-center gap-2 font-bold text-slate-800 text-sm border-b border-slate-200 pb-2">
@@ -366,6 +419,8 @@ export default function ApplyPage() {
                   {!isSubmitting && <ArrowRight className="w-5 h-5" />}
                 </button>
               </form>
+            </>
+          )}
             </div>
           )}
         </div>
