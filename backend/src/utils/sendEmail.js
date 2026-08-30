@@ -13,23 +13,21 @@ const sendEmail = async ({ to, subject, text, html }) => {
   const port = Number(process.env.SMTP_PORT) || 465;
   const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
-  const transportConfig = isGmail
-    ? {
-        service: "gmail",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD,
-        },
-      }
-    : {
-        host: process.env.SMTP_HOST,
-        port,
-        secure,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD,
-        },
-      };
+  // Force IPv4 by NOT using 'service: gmail' and explicitly setting host and family
+  const transportConfig = {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: port,
+    secure: secure,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false
+    },
+    // This forces Node to use IPv4 instead of IPv6 (fixes ENETUNREACH on Render/Vercel)
+    family: 4
+  };
 
   const transporter = nodemailer.createTransport(transportConfig);
 
